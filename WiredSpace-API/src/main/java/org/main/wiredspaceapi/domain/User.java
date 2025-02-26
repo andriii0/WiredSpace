@@ -1,0 +1,20 @@
+package org.main.wiredspaceapi.domain;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.main.wiredspaceapi.domain.enums.UserRole;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+public class User extends Account {
+
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
+    public User(String name, String password, UserRole role) {
+        super(null, name, password);
+        this.role = role;
+    }
+}
