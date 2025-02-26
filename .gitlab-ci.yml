@@ -20,17 +20,13 @@ stages:
 build:
   stage: build
   script:
-  - choco install openjdk17
-  - refreshenv
-  - java -version
-  - cd WiredSpace-API
-  - ./gradlew.bat assemble
+    - java -version
+    - cd WiredSpace-API
+    - ./gradlew.bat assemble
 
 test:
   stage: test
   script:
-    - choco install openjdk17
-    - refreshenv
     - java -version
     - cd WiredSpace-API
     - ./gradlew.bat test
