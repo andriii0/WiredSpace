@@ -17,10 +17,18 @@ stages:
   - build
   - test
 
+before_script:
+  - echo "Setting JAVA_HOME for GitLab Runner"
+  - 'export JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.14.7-hotspot"'
+  - 'export PATH="$JAVA_HOME/bin:$PATH"'
+  - java -version
+
 build:
   stage: build
   script:
     - cd WiredSpace-API
+    - ls -l ./gradlew.bat  # Проверяем, что файл существует
+    - chmod +x ./gradlew.bat  # Делаем исполняемым (необязательно для Windows)
     - ./gradlew.bat assemble
 
 test:
