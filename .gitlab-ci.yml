@@ -20,9 +20,9 @@ stages:
 build:
   stage: build
   script:
-    - ./gradlew assemble
+    - gradlew.bat assemble
 
 test:
   stage: test
   script:
-    - ./gradlew test
+    - gradlew.bat test
