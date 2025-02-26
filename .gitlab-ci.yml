@@ -1,3 +1,30 @@
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+stages:
+  - build
+  - test
+  - qodana
+
+# Общий before_script для runner'а, работающего под Windows (PowerShell)
+before_script:
+  - echo "Setting JAVA_HOME for GitLab Runner"
+  - $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.14.7-hotspot"
+  - $env:Path="$env:JAVA_HOME\bin;$env:Path"
+  - java -version
+
+build:
+  stage: build
+  script:
+    - cd WiredSpace-API
+    - ./gradlew.bat assemble
+
+test:
+  stage: test
+  script:
+    - cd WiredSpace-API
+    - ./gradlew.bat test
+
 qodana:
   only:
     - main
@@ -9,30 +36,3 @@ qodana:
     QODANA_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0IjoiOWt5am8iLCJvcmdhbml6YXRpb24iOiIzZDVsSyIsInRva2VuIjoiQXZxTzgifQ.ebkAGAabxgY2Tb81QEBmlQt12fPugpXXE6JM437rQp0
   script:
     - qodana --save-report --results-dir=$CI_PROJECT_DIR/.qodana
-
-variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-
-stages:
-  - build
-  - test
-
-before_script:
-  - echo "Setting JAVA_HOME for GitLab Runner"
-  - $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.14.7-hotspot"
-  - $env:Path="$env:JAVA_HOME\bin;$env:Path"
-  - java -version
-
-build:
-  stage: build
-  script:
-    - cd WiredSpace-API
-    - ls -l ./gradlew.bat  # Проверяем, что файл существует
-    - chmod +x ./gradlew.bat  # Делаем исполняемым (необязательно для Windows)
-    - ./gradlew.bat assemble
-
-test:
-  stage: test
-  script:
-    - cd WiredSpace-API
-    - ./gradlew.bat test
