@@ -20,9 +20,11 @@ stages:
 build:
   stage: build
   script:
+    - cd WiredSpace-API
     - gradlew.bat assemble
 
 test:
   stage: test
   script:
+    - cd WiredSpace-API
     - gradlew.bat test
