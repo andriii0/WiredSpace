@@ -1,10 +1,12 @@
-variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-
 stages:
   - build
   - test
   - qodana
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  # QODANA_TOKEN задаётся в настройках GitLab CI/CD, а не в файле:
+  # QODANA_TOKEN: $QODANA_TOKEN
 
 # Общий before_script для runner'а, работающего под Windows (PowerShell)
 before_script:
@@ -26,13 +28,12 @@ test:
     - ./gradlew.bat test
 
 qodana:
-  only:
-    - main
-    - merge_requests
+  stage: qodana
   image:
     name: jetbrains/qodana-jvm
     entrypoint: [""]
-  variables:
-    QODANA_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9qZWN0IjoiOWt5am8iLCJvcmdhbml6YXRpb24iOiIzZDVsSyIsInRva2VuIjoiQXZxTzgifQ.ebkAGAabxgY2Tb81QEBmlQt12fPugpXXE6JM437rQp0
+  only:
+    - main
+    - merge_requests
   script:
     - qodana --save-report --results-dir=$CI_PROJECT_DIR/.qodana
