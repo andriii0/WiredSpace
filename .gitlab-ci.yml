@@ -18,13 +18,17 @@ stages:
   - test
 
 build:
+  image: eclipse-temurin:17
   stage: build
   script:
+    - java -version
     - cd WiredSpace-API
     - ./gradlew.bat assemble
 
 test:
+  image: eclipse-temurin:17
   stage: test
   script:
+    - java -version
     - cd WiredSpace-API
     - ./gradlew.bat test
