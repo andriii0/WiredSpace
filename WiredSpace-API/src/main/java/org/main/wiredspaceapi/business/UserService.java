@@ -1,12 +1,18 @@
 package org.main.wiredspaceapi.business;
 
 import org.main.wiredspaceapi.domain.User;
+import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.springframework.stereotype.Service;
 
-@Service
-public class UserService {
+import java.util.List;
+import java.util.Optional;
 
-    public void GreetUser(User user) {
-        System.out.println("Greeting " + user.getName());
-    }
+public interface UserService {
+    User createUser(String name, String password);
+    User createUser(String name, String password, UserRole userRole);
+    Optional<User> getUserById(Long id);
+    List<User> getAllUsers();
+    User updateUser(Long id, String name, String password);
+    User updateUser(Long id, String name, String password, UserRole userRole);
+    void deleteUser(Long id);
 }
