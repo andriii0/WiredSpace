@@ -8,7 +8,6 @@ variables:
   # QODANA_TOKEN задаётся в настройках GitLab CI/CD, а не в файле:
   # QODANA_TOKEN: $QODANA_TOKEN
 
-# Общий before_script для runner'а, работающего под Windows (PowerShell)
 before_script:
   - echo "Setting JAVA_HOME for GitLab Runner"
   - $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.14.7-hotspot"
@@ -29,11 +28,6 @@ test:
 
 qodana:
   stage: qodana
-  image:
-    name: jetbrains/qodana-jvm
-    entrypoint: [""]
-  only:
-    - main
-    - merge_requests
   script:
-    - qodana --save-report --results-dir=$CI_PROJECT_DIR/.qodana
+    - docker run --rm -v "$CI_PROJECT_DIR":/data jetbrains/qodana-jvm qodana --save-report --results-dir=/data/.qodana
+
