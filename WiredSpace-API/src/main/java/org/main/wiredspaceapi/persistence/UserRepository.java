@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.business;
+package org.main.wiredspaceapi.persistence;
 
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
@@ -6,7 +6,7 @@ import org.main.wiredspaceapi.domain.enums.UserRole;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserService {
+public interface UserRepository {
     User createUser(String name, String password);
     User createUser(String name, String password, UserRole userRole);
     Optional<User> getUserById(Long id);
@@ -14,4 +14,5 @@ public interface UserService {
     User updateUser(Long id, String name, String password);
     User updateUser(Long id, String name, String password, UserRole userRole);
     void deleteUser(Long id);
+
 }

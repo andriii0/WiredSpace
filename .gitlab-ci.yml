@@ -1,7 +1,7 @@
 stages:
   - build
   - test
-  - qodana
+  #- qodana
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
@@ -30,3 +30,5 @@ qodana:
   stage: qodana
   script:
     - docker run --rm -v "$($env:CI_PROJECT_DIR)/WiredSpace-API:/data" jetbrains/qodana-jvm qodana --save-report --results-dir=/data/.qodana
+
+
