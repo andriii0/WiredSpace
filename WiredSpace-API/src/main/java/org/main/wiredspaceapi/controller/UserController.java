@@ -21,7 +21,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO userCreateDTO) {
-        User user = userService.createUser(userCreateDTO.getName(), userCreateDTO.getPassword());
+        User user = userService.createUser(userCreateDTO.getName(), userCreateDTO.getPassword(), userCreateDTO.getRole());
         return ResponseEntity.ok(new UserDTO(user.getId(), user.getName(), user.getRole()));
     }
 
@@ -48,7 +48,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserCreateDTO userCreateDTO) {
-        User updatedUser = userService.updateUser(id, userCreateDTO.getName(), userCreateDTO.getPassword(), userCreateDTO.getUserRole());
+        User updatedUser = userService.updateUser(id, userCreateDTO.getName(), userCreateDTO.getPassword(), userCreateDTO.getRole());
         return ResponseEntity.ok(new UserDTO(updatedUser.getId(), updatedUser.getName(), updatedUser.getRole()));
     }
 
