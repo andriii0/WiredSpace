@@ -34,13 +34,13 @@ class UserServiceTest {
 
     @Test
     void createUser_ShouldReturnSavedUser() {
-        when(userRepository.createUser("TestUser", "password123")).thenReturn(user);
+        when(userRepository.createUser("TestUser", "password123", UserRole.STANDARD_USER)).thenReturn(user);
 
-        User createdUser = userService.createUser("TestUser", "password123");
+        User createdUser = userService.createUser("TestUser", "password123", UserRole.STANDARD_USER);
 
         assertNotNull(createdUser);
         assertEquals("TestUser", createdUser.getName());
-        verify(userRepository, times(1)).createUser("TestUser", "password123");
+        verify(userRepository, times(1)).createUser("TestUser", "password123", UserRole.STANDARD_USER);
     }
 
     @Test

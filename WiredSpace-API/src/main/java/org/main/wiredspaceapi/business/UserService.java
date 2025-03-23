@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    User createUser(String name, String password);
     User createUser(String name, String password, UserRole userRole);
     Optional<User> getUserById(Long id);
     List<User> getAllUsers();

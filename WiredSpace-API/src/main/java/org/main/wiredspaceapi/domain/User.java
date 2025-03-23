@@ -10,7 +10,7 @@ import org.main.wiredspaceapi.domain.enums.UserRole;
 @NoArgsConstructor
 public class User extends Account {
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated
     private UserRole role;
 
     public User(String name, String password, UserRole role) {
