@@ -1,14 +1,34 @@
-.gradle
-/build
-/out
-/node_modules
-*.iml
-.idea
-*.log
-
-
-*.iml
+# Ignore build directories
+build/
+.gradle/
+# Ignore IDE and editor files
 .idea/
 .vscode/
-
-.env
+*.swp
+*.swo
+# Ignore test files
+test/
+# Ignore version control files
+.git/
+.gitignore
+# Ignore environment and secret files
+.env*
+*.pem
+*.key
+*.crt
+# Ignore temporary and local files
+tmp/
+temp/
+*.tmp
+.local/
+# Ignore documentation and Docker files
+docs/
+*.md
+README*
+Dockerfile*
+docker-compose*
+# Ignore Java-specific files
+*.class
+# Ensure not to ignore necessary files
+!src/main/**
+!src/resources/**
