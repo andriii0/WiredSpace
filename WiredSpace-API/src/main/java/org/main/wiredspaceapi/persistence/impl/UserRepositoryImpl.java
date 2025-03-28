@@ -24,6 +24,10 @@ public class UserRepositoryImpl implements UserRepository {
     public User createUser(String name, String password, UserRole userRole) {
         return userDB.save(new User(name, password, userRole));
     }
+    @Override
+    public Optional<User> findByName(String name) {
+        return userDB.findByName(name);
+    }
 
     @Override
     public Optional<User> getUserById(Long id) {

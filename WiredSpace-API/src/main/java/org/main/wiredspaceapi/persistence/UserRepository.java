@@ -11,6 +11,7 @@ public interface UserRepository {
     User createUser(String name, String password, UserRole userRole);
     Optional<User> getUserById(Long id);
     List<User> getAllUsers();
+    Optional<User> findByName(String name);
     User updateUser(Long id, String name, String password);
     User updateUser(Long id, String name, String password, UserRole userRole);
     void deleteUser(Long id);
