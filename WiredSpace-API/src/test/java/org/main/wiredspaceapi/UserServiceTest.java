@@ -10,6 +10,7 @@ import org.main.wiredspaceapi.persistence.UserRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -34,13 +37,17 @@ class UserServiceTest {
 
     @Test
     void createUser_ShouldReturnSavedUser() {
-        when(userRepository.createUser("TestUser", "password123", UserRole.STANDARD_USER)).thenReturn(user);
+        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword123");
+        when(userRepository.createUser("TestUser", "encodedPassword123", UserRole.STANDARD_USER))
+                .thenReturn(user);
 
         User createdUser = userService.createUser("TestUser", "password123", UserRole.STANDARD_USER);
 
         assertNotNull(createdUser);
         assertEquals("TestUser", createdUser.getName());
-        verify(userRepository, times(1)).createUser("TestUser", "password123", UserRole.STANDARD_USER);
+
+        verify(passwordEncoder, times(1)).encode("password123");
+        verify(userRepository, times(1)).createUser("TestUser", "encodedPassword123", UserRole.STANDARD_USER);
     }
 
     @Test
