@@ -7,12 +7,6 @@ plugins {
 
 }
 
-val computerName = System.getenv("COMPUTERNAME") ?: error("COMPUTERNAME не задан!")
-
-val sonarToken = System.getenv("SONAR_TOKEN")
-	?: throw GradleException("Environment variable is not set!")
-
-
 group = "org.main"
 version = "0.0.1-SNAPSHOT"
 
@@ -38,7 +32,9 @@ sonar {
 		property("sonar.projectKey", "WiredSpace")
 		property("sonar.projectName", "WiredSpace")
 		property("sonar.host.url", "http://localhost:9000")
-		property("sonar.token", sonarToken)
+		val token = System.getenv("SONAR_TOKEN")
+			?: throw GradleException("Environment variable SONAR_TOKEN is not set!")
+		property("sonar.token", token)
 		//property("sonar.junit.reportPaths", "build/test-results/test")
 		//property("sonar.java.coveragePlugin", "jacoco")
 		//property("sonar.jacoco.reportPath", "build/reports/jacoco/test/jacocoTestReport.xml")
