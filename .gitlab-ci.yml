@@ -34,6 +34,7 @@ build-sonar:
     - cd WiredSpace-API
     - echo "Environment:" $env:COMPUTERNAME
     - ./gradlew.bat test jacocoTestReport sonar
+    - ./gradlew -Dsonar.token="$SONAR_TOKEN" -Dsonar.host.url="$SONAR_HOST_URL" sonar
 
   allow_failure: true
   rules:

@@ -34,11 +34,6 @@ sonar {
 		property("sonar.projectKey", "WiredSpace")
 		property("sonar.projectName", "WiredSpace")
 		property("sonar.host.url", "http://localhost:9000")
-
-		val sonarToken = System.getenv("SONAR_TOKEN")
-			?: throw GradleException("SONAR_TOKEN environment variable is not set")
-
-		property("sonar.token", sonarToken)
 	}
 }
 
