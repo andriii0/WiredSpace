@@ -26,12 +26,6 @@ repositories {
 	mavenCentral()
 }
 
-tasks.register("printWorkingDir") {
-	doLast {
-		println("Current working directory: " + System.getProperty("user.dir"))
-	}
-}
-
 
 sonar {
 	properties {
@@ -39,10 +33,11 @@ sonar {
 		property("sonar.projectName", "Wiredspace")
 		property("sonar.qualitygate.wait", true)
 		property("sonar.host.url", "http://localhost:9000")
+		property("sonar.token", "sqp_3c0bf4f8246d3709cdfa347f92e80411154fc5b8")
 		property("sonar.java.binaries", "build/classes/java/main")
 		property("sonar.java.test.binaries", "build/classes/java/test")
 		property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
-		property("sonar.junit.reportPaths", "${project.projectDir}/build/test-results/test")
+		property("sonar.junit.reportPaths", "build/test-results/test")
 	}
 }
 
@@ -94,4 +89,5 @@ tasks.jacocoTestReport {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	//finalizedBy jacocoTestReport
 }

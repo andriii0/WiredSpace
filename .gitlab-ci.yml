@@ -40,7 +40,7 @@ build-sonar:
       - sonar-scanner/
   script:
     - cd WiredSpace-API
-    - ./gradlew.bat jacocoTestReport sonar
+    - ./gradlew.bat test jacocoTestReport sonar
   allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
