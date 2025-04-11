@@ -9,11 +9,9 @@ plugins {
 
 val computerName = System.getenv("COMPUTERNAME") ?: error("COMPUTERNAME не задан!")
 
-val sonarToken = when (computerName) {
-	"ANDRII" -> System.getenv("SONAR_TOKEN_PC")
-	"DESKTOP-6QK4NA7" -> System.getenv("SONAR_TOKEN_LAPTOP")
-	else -> throw GradleException("Unknown computer name: $computerName")
-}
+val sonarToken = System.getenv("SONAR_TOKEN")
+	?: throw GradleException("Environment variable is not set!")
+
 
 group = "org.main"
 version = "0.0.1-SNAPSHOT"
