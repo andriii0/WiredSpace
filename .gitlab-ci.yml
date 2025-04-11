@@ -35,15 +35,9 @@ build-sonar:
     - echo "Computer Name: $env:COMPUTERNAME"
 
     - |
-      if ($env:COMPUTERNAME -eq "ANDRII") {
-        $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC
-        $env:SONAR_HOST_URL = $env:SONAR_HOST_URL_PC
+      if ($env:COMPUTERNAME -eq "ANDRII") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC
       }
-      else if ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP
-        $env:SONAR_HOST_URL = $env:SONAR_HOST_URL_LAPTOP
-      }
-      else { echo "Unknown environment:" $env:COMPUTERNAME
-        exit 1
+      else ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP
       }
     - echo "Environment:" $env:COMPUTERNAME
     - echo "Token length:" $env:SONAR_TOKEN.Length
