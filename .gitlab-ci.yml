@@ -33,10 +33,7 @@ build-sonar:
   script:
     - cd WiredSpace-API
     - echo "Environment: $env:COMPUTERNAME"
-    - echo "SONAR_TOKEN is set (masked)"
-    - ./gradlew.bat test
-    - ./gradlew.bat jacocoTestReport
-    - ./gradlew.bat sonar
+    - ./gradlew.bat test jacocoTestReport sonar
 
   allow_failure: true
   rules:
