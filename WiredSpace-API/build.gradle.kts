@@ -31,9 +31,11 @@ sonar {
 	properties {
 		property("sonar.projectKey", "WiredSpace")
 		property("sonar.projectName", "WiredSpace")
-		property("sonar.qualitygate.wait", true)
-		property("sonar.token", "sqa_4a27890734f12e6af5c8c1b896b0181f7ef7c7d3")
 		property("sonar.host.url", "http://localhost:9000")
+		property("sonar.token", "sqa_8e7607b6673c8b17742b7873be6758ba5647b097")
+		//property("sonar.junit.reportPaths", "build/test-results/test")
+		//property("sonar.java.coveragePlugin", "jacoco")
+		//property("sonar.jacoco.reportPath", "build/reports/jacoco/test/jacocoTestReport.xml")
 	}
 }
 
@@ -70,5 +72,9 @@ tasks.jacocoTestReport {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-	//finalizedBy jacocoTestReport
+	finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.named("sonar") {
+	dependsOn("test", "jacocoTestReport")
 }
