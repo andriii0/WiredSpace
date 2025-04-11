@@ -30,6 +30,7 @@ sonar {
 		property("sonar.projectKey", "Wiredspace")
 		property("sonar.projectName", "Wiredspace")
 		property("sonar.qualitygate.wait", true)
+		property("sonar.testExecutionReportPaths", "build/test-results/test/*.xml") 
 	}
 }
 
