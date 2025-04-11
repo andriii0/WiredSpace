@@ -47,7 +47,9 @@ build-sonar:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$SONAR_ENV == "PC"'
+    - if: '$SONAR_ENV == "Laptop"'
 
 #qodana:
 #  stage: qodana
