@@ -28,24 +28,27 @@ test:
     - ./gradlew.bat test
 
 
-build-sonar:
+build-sonar-pc:
   stage: build-sonar
-  cache:
-    policy: pull-push
-    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${SONAR_USER_HOME}/cache"
-      - sonar-scanner/
+  environment:
+    name: PC
   script:
     - cd WiredSpace-API
-    - ./gradlew.bat test jacocoTestReport sonar
-  allow_failure: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'master'
-    - if: $CI_COMMIT_BRANCH == 'main'
-    - if: $CI_COMMIT_BRANCH == 'develop'
-qodana:
-  stage: qodana
+    - ./gradlew.bat test jacocoTestReport sonar \
+      -Dsonar.host.url=$SONAR_HOST_URL \
+      -Dsonar.login=$SONAR_TOKEN
+
+build-sonar-laptop:
+  stage: build-sonar
+  environment:
+    name: Laptop
   script:
-    - docker run --rm -v "$($env:CI_PROJECT_DIR)/WiredSpace-API:/data" jetbrains/qodana-jvm qodana --save-report --results-dir=/data/.qodana
+    - cd WiredSpace-API
+    - ./gradlew.bat test jacocoTestReport sonar \
+      -Dsonar.host.url=$SONAR_HOST_URL \
+      -Dsonar.login=$SONAR_TOKEN
+
+#qodana:
+#  stage: qodana
+#  script:
+#    - docker run --rm -v "$($env:CI_PROJECT_DIR)/WiredSpace-API:/data" jetbrains/qodana-jvm qodana --save-report --results-dir=/data/.qodana
