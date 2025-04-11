@@ -38,16 +38,18 @@ build-sonar:
       - sonar-scanner/
   script:
     - cd WiredSpace-API
-    - |
-      echo "Determining environment..."
-      if ($env:COMPUTERNAME -eq "PC") {
-        $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC
+    - >
+      echo "Determining environment...";
+      if ($env:COMPUTERNAME -eq "Andrii") {
+        $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC;
         echo "Environment detected: PC"
-      } elseif ($env:COMPUTERNAME -eq "LAPTOP") {
-        $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP
+      }
+      elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") {
+        $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP;
         echo "Environment detected: Laptop"
-      } else {
-        echo "Unknown environment: $env:COMPUTERNAME"
+      }
+      else {
+        echo "Unknown environment: $env:COMPUTERNAME";
         exit 1
       }
     - echo "Using SonarQube URL: $env:SONAR_HOST_URL"
@@ -60,7 +62,6 @@ build-sonar:
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
-
 #qodana:
 #  stage: qodana
 #  script:
