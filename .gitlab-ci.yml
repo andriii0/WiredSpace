@@ -29,6 +29,7 @@ test:
     - cd WiredSpace-API
     - ./gradlew.bat test
 
+
 build-sonar:
   stage: build-sonar
   cache:
@@ -39,8 +40,7 @@ build-sonar:
       - sonar-scanner/
   script:
     - cd WiredSpace-API
-    - ./gradlew.bat jacocoTestReport
-    - ./gradlew.bat build sonar
+    - ./gradlew.bat jacocoTestReport sonar
   allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
