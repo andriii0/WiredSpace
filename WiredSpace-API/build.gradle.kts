@@ -26,6 +26,7 @@ repositories {
 	mavenCentral()
 }
 
+val computerName = System.getenv("COMPUTERNAME")
 
 
 
@@ -34,9 +35,21 @@ sonar {
 		property("sonar.projectKey", "WiredSpace")
 		property("sonar.projectName", "WiredSpace")
 		property("sonar.host.url", "http://localhost:9000")
+
+		val sonarToken = System.getenv("SONAR_TOKEN")
+			?: when (computerName) {
+				"ANDRII" -> System.getenv("SONAR_TOKEN_PC")
+				"DESKTOP-6QK4NA7" -> System.getenv("SONAR_TOKEN_LAPTOP")
+				else -> throw GradleException("Unknown computer name: $computerName and SONAR_TOKEN not set")
+			}
+
+
+		property("sonar.token", sonarToken)
+		//property("sonar.junit.reportPaths", "build/test-results/test")
+		//property("sonar.java.coveragePlugin", "jacoco")
+		//property("sonar.jacoco.reportPath", "build/reports/jacoco/test/jacocoTestReport.xml")
 	}
 }
-
 
 
 
