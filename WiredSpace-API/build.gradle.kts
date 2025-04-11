@@ -34,10 +34,6 @@ sonar {
 		property("sonar.qualitygate.wait", true)
 		property("sonar.host.url", "http://localhost:9000")
 		property("sonar.token", "sqp_9c2b46ae230097f88ca47f9c2421f68941d408fa")
-		property("sonar.java.binaries", "build/classes/java/main")
-		property("sonar.java.test.binaries", "build/classes/java/test")
-		property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
-		property("sonar.junit.reportPaths", "build/test-results/test")
 	}
 }
 
@@ -69,21 +65,6 @@ tasks.jacocoTestReport {
 		xml.required.set(true)
 		html.required.set(true)
 	}
-
-	classDirectories.setFrom(
-		files(classDirectories.files.map {
-			fileTree(it) {
-				exclude(
-					"org/main/wiredspaceapi/controller/**",
-					"org/main/wiredspaceapi/configuration/**",
-					"org/main/wiredspaceapi/exceptions/**",
-					"org/main/wiredspaceapi/persistence/**",
-					"org/main/wiredspaceapi/domain/**",
-					"org/main/wiredspaceapi/WiredSpaceApiApplication.class"
-				)
-			}
-		})
-	)
 }
 
 
