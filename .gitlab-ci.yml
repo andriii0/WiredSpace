@@ -55,7 +55,7 @@ build-sonar:
     - echo "TOKEN:" $env:SONAR_TOKEN
     - echo "TOKEN LENGTH:" $env:SONAR_TOKEN.length
     - echo "ALL ENV VARS:"
-    - Get-ChildItem Env:
+    - printenv
     - ./gradlew.bat test
     - ./gradlew.bat jacocoTestReport
     - ./gradlew.bat "-Dsonar.host.url=$env:SONAR_HOST_URL" "-Dsonar.login=$env:SONAR_TOKEN" sonar
