@@ -30,29 +30,14 @@ test:
 
 build-sonar:
   stage: build-sonar
-  cache:
-    policy: pull-push
-    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${SONAR_USER_HOME}/cache"
-      - sonar-scanner/
   script:
     - cd WiredSpace-API
-    - >
-      if ($env:COMPUTERNAME -eq "Andrii") {
-        $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC
-        echo "Environment detected: PC"
-      } elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") {
-        $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP
-        echo "Environment detected: Laptop"
-      } else {
-        echo "Unknown environment: $env:COMPUTERNAME"
-        exit 1
-      }
-    - echo "SONAR_TOKEN is set"
+    - echo "Environment: $env:COMPUTERNAME"
+    - echo "SONAR_TOKEN is set (masked)"
     - ./gradlew.bat test
     - ./gradlew.bat jacocoTestReport
-    - ./gradlew.bat "-Dsonar.host.url=$env:SONAR_HOST_URL" "-Dsonar.token=$env:SONAR_TOKEN" sonar
+    - ./gradlew.bat sonar
+
   allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
