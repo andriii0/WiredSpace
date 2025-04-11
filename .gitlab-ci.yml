@@ -33,14 +33,11 @@ build-sonar:
   script:
     - cd WiredSpace-API
     - echo "Computer Name: $env:COMPUTERNAME"
-
-    - |
-      if ($env:COMPUTERNAME -eq "ANDRII") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC
-      }
-      else ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP
-      }
-    - echo "Environment:" $env:COMPUTERNAME
-    - echo "Token length:" $env:SONAR_TOKEN.Length
+    - if ($env:COMPUTERNAME -eq "ANDRII") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC; $env:SONAR_HOST_URL = $env:SONAR_HOST_URL_PC }
+    - elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP; $env:SONAR_HOST_URL = $env:SONAR_HOST_URL_LAPTOP }
+    - else { echo "Unknown environment: $env:COMPUTERNAME"; exit 1 }
+    - echo "Environment: $env:COMPUTERNAME"
+    - echo "Token length: $($env:SONAR_TOKEN.Length)"
     - echo "TESTING START"
     - ./gradlew.bat test jacocoTestReport
     - echo "CONNECTION TO SONAR START"
