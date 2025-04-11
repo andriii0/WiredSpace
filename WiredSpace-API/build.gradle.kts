@@ -63,22 +63,20 @@ tasks.jacocoTestReport {
 		html.required.set(true)
 	}
 
-	afterEvaluate {
-		classDirectories.setFrom(
-			files(classDirectories.files.map {
-				fileTree(it) {
-					exclude(
-						"org/main/wiredspaceapi/controller/**",
-						"org/main/wiredspaceapi/configuration/**",
-						"org/main/wiredspaceapi/exceptions/**",
-						"org/main/wiredspaceapi/persistence/**",
-						"org/main/wiredspaceapi/domain/**",
-						"org/main/wiredspaceapi/WiredSpaceApiApplication.class"
-					)
-				}
-			})
-		)
-	}
+	classDirectories.setFrom(
+		files(classDirectories.files.map {
+			fileTree(it) {
+				exclude(
+					"org/main/wiredspaceapi/controller/**",
+					"org/main/wiredspaceapi/configuration/**",
+					"org/main/wiredspaceapi/exceptions/**",
+					"org/main/wiredspaceapi/persistence/**",
+					"org/main/wiredspaceapi/domain/**",
+					"org/main/wiredspaceapi/WiredSpaceApiApplication.class"
+				)
+			}
+		})
+	)
 }
 
 

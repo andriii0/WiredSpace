@@ -39,6 +39,7 @@ build-sonar:
       - sonar-scanner/
   script:
     - cd WiredSpace-API
+    - ./gradlew.bat jacocoTestReport
     - ./gradlew.bat build sonar
   allow_failure: true
   rules:
