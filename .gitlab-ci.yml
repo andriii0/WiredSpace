@@ -32,14 +32,23 @@ build-sonar:
   stage: build-sonar
   environment:
     name: $SONAR_ENV
+  cache:
+    policy: pull-push
+    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${SONAR_USER_HOME}/cache"
+      - sonar-scanner/
   script:
     - cd WiredSpace-API
     - ./gradlew.bat test jacocoTestReport sonar \
       -Dsonar.host.url=$SONAR_HOST_URL \
       -Dsonar.login=$SONAR_TOKEN
+  allow_failure: true
   rules:
-    - if: '$SONAR_ENV == "PC"'
-    - if: '$SONAR_ENV == "Laptop"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
 
 #qodana:
 #  stage: qodana
