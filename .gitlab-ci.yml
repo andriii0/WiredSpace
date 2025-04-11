@@ -49,8 +49,10 @@ build-sonar:
         echo "Unknown environment: $env:COMPUTERNAME";
         exit 1
       }
-    - ./gradlew.bat test
-    - ./gradlew.bat jacocoTestReport
+    - echo "Token length: $($env:SONAR_TOKEN.Length)"
+    - echo "TESTING START"
+    - ./gradlew.bat test jacocoTestReport
+    - echo "CONNECTION TO SONAR START"
     - ./gradlew.bat "-Dsonar.host.url=$env:SONAR_HOST_URL" "-Dsonar.login=$env:SONAR_TOKEN" sonar
   allow_failure: true
   rules:
