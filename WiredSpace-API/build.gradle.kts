@@ -33,7 +33,7 @@ sonar {
 		property("sonar.projectName", "Wiredspace")
 		property("sonar.qualitygate.wait", true)
 		property("sonar.host.url", "http://localhost:9000")
-		property("sonar.token", "sqp_3c0bf4f8246d3709cdfa347f92e80411154fc5b8")
+		property("sonar.token", "sqp_9c2b46ae230097f88ca47f9c2421f68941d408fa")
 		property("sonar.java.binaries", "build/classes/java/main")
 		property("sonar.java.test.binaries", "build/classes/java/test")
 		property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
