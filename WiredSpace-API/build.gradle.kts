@@ -26,12 +26,19 @@ repositories {
 	mavenCentral()
 }
 
+tasks.register("printWorkingDir") {
+	doLast {
+		println("Current working directory: " + System.getProperty("user.dir"))
+	}
+}
+
+
 sonar {
 	properties {
 		property("sonar.projectKey", "Wiredspace")
 		property("sonar.projectName", "Wiredspace")
 		property("sonar.qualitygate.wait", true)
-		property("sonar.java.binaries", "build/classes")
+		property("sonar.java.binaries", "build/classes/java/main")
 		property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
 		property("sonar.junit.reportPaths", "build/test-results/test")
 	}
