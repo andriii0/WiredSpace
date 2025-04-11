@@ -3,6 +3,7 @@ plugins {
 	id("org.springframework.boot") version "3.4.3"
 	id("io.spring.dependency-management") version "1.1.7"
 	id ("org.sonarqube") version "6.0.1.5171"
+	id("jacoco")
 
 }
 
@@ -33,6 +34,8 @@ sonar {
 	}
 }
 
+
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -51,6 +54,33 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(
+			files(classDirectories.files.map {
+				fileTree(it) {
+					exclude(
+						"org/main/wiredspaceapi/controller/**",
+						"org/main/wiredspaceapi/configuration/**",
+						"org/main/wiredspaceapi/exceptions/**",
+						"org/main/wiredspaceapi/persistence/**",
+						"org/main/wiredspaceapi/domain/**",
+						"org/main/wiredspaceapi/WiredSpaceApiApplication.class"
+					)
+				}
+			})
+		)
+	}
+}
+
 
 tasks.withType<Test> {
 	useJUnitPlatform()
