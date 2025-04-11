@@ -1,17 +1,28 @@
+image: gradle:8.10.0-jdk17-jammy
+
 stages:
   - build
   - test
+  - build-sonar
+  - qodana
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  # QODANA_TOKEN задаётся в настройках GitLab CI/CD, а не в файле:
-  # QODANA_TOKEN: $QODANA_TOKEN
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
 before_script:
   - echo "Setting JAVA_HOME for GitLab Runner"
-  - $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.14.7-hotspot"
-  - $env:Path="$env:JAVA_HOME\bin;$env:Path"
+  - export JAVA_HOME=/opt/java/openjdk
+  - export PATH=$JAVA_HOME/bin:$PATH
   - java -version
+
+cache:
+  paths:
+    - .gradle/wrapper/
+    - .gradle/caches/
+    - "${SONAR_USER_HOME}/cache"
+    - sonar-scanner/
 
 build:
   stage: build
@@ -25,9 +36,19 @@ test:
     - cd WiredSpace-API
     - ./gradlew.bat test
 
-#qodana:
-#  stage: qodana
-#  script:
-#    - docker run --rm -v "$($env:CI_PROJECT_DIR)/WiredSpace-API:/data" jetbrains/qodana-jvm qodana --save-report --results-dir=/data/.qodana
+build-sonar:
+  stage: build-sonar
+  script:
+    - cd WiredSpace-API
+    - ./gradlew sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.projectKey=YOUR_PROJECT_KEY -Dsonar.host.url=https://your-sonarqube-instance
+  allow_failure: true
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == 'master'
+    - if: $CI_COMMIT_BRANCH == 'main'
+    - if: $CI_COMMIT_BRANCH == 'develop'
 
-
+# qodana:
+#   stage: qodana
+#   script:
+#     - docker run --rm -v "$($env:CI_PROJECT_DIR)/WiredSpace-API:/data" jetbrains/qodana-jvm qodana --save-report --results-dir=/data/.qodana

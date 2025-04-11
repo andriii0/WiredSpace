@@ -2,6 +2,8 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.4.3"
 	id("io.spring.dependency-management") version "1.1.7"
+	id ("org.sonarqube") version "6.0.1.5171"
+
 }
 
 group = "org.main"
@@ -21,6 +23,14 @@ configurations {
 
 repositories {
 	mavenCentral()
+}
+
+sonar {
+	properties {
+		property("sonar.projectKey", "Wiredspace")
+		property("sonar.projectName", "Wiredspace")
+		property("sonar.qualitygate.wait", true)
+	}
 }
 
 dependencies {
