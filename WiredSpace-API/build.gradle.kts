@@ -29,11 +29,11 @@ repositories {
 
 sonar {
 	properties {
-		property("sonar.projectKey", "Wiredspace")
-		property("sonar.projectName", "Wiredspace")
+		property("sonar.projectKey", "WiredSpace")
+		property("sonar.projectName", "WiredSpace")
 		property("sonar.qualitygate.wait", true)
+		property("sonar.token", "sqa_4a27890734f12e6af5c8c1b896b0181f7ef7c7d3")
 		property("sonar.host.url", "http://localhost:9000")
-		property("sonar.token", "sqp_9c2b46ae230097f88ca47f9c2421f68941d408fa")
 	}
 }
 
