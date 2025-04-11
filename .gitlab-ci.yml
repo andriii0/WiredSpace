@@ -30,8 +30,6 @@ test:
 
 build-sonar:
   stage: build-sonar
-  environment:
-    name: $SONAR_ENV
   cache:
     policy: pull-push
     key: "sonar-cache-$CI_COMMIT_REF_SLUG"
@@ -40,6 +38,7 @@ build-sonar:
       - sonar-scanner/
   script:
     - cd WiredSpace-API
+    - echo "Using SONAR_ENV: $SONAR_ENV"
     - ./gradlew.bat test jacocoTestReport sonar \
       -Dsonar.host.url=$SONAR_HOST_URL \
       -Dsonar.login=$SONAR_TOKEN
