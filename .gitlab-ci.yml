@@ -28,25 +28,18 @@ test:
     - ./gradlew.bat test
 
 
-build-sonar-pc:
+build-sonar:
   stage: build-sonar
   environment:
-    name: PC
+    name: $SONAR_ENV
   script:
     - cd WiredSpace-API
     - ./gradlew.bat test jacocoTestReport sonar \
       -Dsonar.host.url=$SONAR_HOST_URL \
       -Dsonar.login=$SONAR_TOKEN
-
-build-sonar-laptop:
-  stage: build-sonar
-  environment:
-    name: Laptop
-  script:
-    - cd WiredSpace-API
-    - ./gradlew.bat test jacocoTestReport sonar \
-      -Dsonar.host.url=$SONAR_HOST_URL \
-      -Dsonar.login=$SONAR_TOKEN
+  rules:
+    - if: '$SONAR_ENV == "PC"'
+    - if: '$SONAR_ENV == "Laptop"'
 
 #qodana:
 #  stage: qodana
