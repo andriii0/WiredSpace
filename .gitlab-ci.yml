@@ -38,31 +38,28 @@ build-sonar:
       - sonar-scanner/
   script:
     - cd WiredSpace-API
-    - |
+    - >
       if ($env:COMPUTERNAME -eq "Andrii") {
         $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC
         echo "Environment detected: PC"
-        echo "Token value: $($env:SONAR_TOKEN)"
-      }
-      elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") {
+      } elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") {
         $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP
         echo "Environment detected: Laptop"
-        echo "Token value: $($env:SONAR_TOKEN)"
-      }
-      else {
+      } else {
         echo "Unknown environment: $env:COMPUTERNAME"
         exit 1
       }
-    
+    - echo "SONAR_TOKEN is set"
     - ./gradlew.bat test
     - ./gradlew.bat jacocoTestReport
-    - ./gradlew.bat "-Dsonar.host.url=$env:SONAR_HOST_URL" "-Dsonar.login=$env:SONAR_TOKEN" sonar
+    - ./gradlew.bat "-Dsonar.host.url=$env:SONAR_HOST_URL" "-Dsonar.token=$env:SONAR_TOKEN" sonar
   allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
+
 #qodana:
 #  stage: qodana
 #  script:
