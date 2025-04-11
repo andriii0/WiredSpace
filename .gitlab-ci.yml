@@ -49,7 +49,7 @@ build-sonar:
         echo "Unknown environment: $env:COMPUTERNAME";
         exit 1
       }
-    - echo "Token length: $($env:SONAR_TOKEN.Length)"
+    - echo "Token length:" $env:SONAR_TOKEN.Length
     - echo "TESTING START"
     - ./gradlew.bat test jacocoTestReport
     - echo "CONNECTION TO SONAR START"
