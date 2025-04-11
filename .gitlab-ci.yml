@@ -30,25 +30,34 @@ test:
 
 build-sonar:
   stage: build-sonar
+  cache:
+    policy: pull-push
+    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+    paths:
+      - "${SONAR_USER_HOME}/cache"
+      - sonar-scanner/
   script:
     - cd WiredSpace-API
-    - echo "Computer Name: $env:COMPUTERNAME"
-    - "if ($env:COMPUTERNAME -eq 'ANDRII') { $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC; echo 'Environment: PC' } elseif ($env:COMPUTERNAME -eq 'DESKTOP-6QK4NA7') { $env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP; echo 'Environment: Laptop' } else { echo \"Unknown environment: $env:COMPUTERNAME\"; exit 1 }"
-    - echo "Token length: $($env:SONAR_TOKEN.Length)"
-    - echo "TESTING START"
-    - ./gradlew.bat test jacocoTestReport
-    - echo "CONNECTION TO SONAR START"
-    - ./gradlew.bat "-Dsonar.token=$env:SONAR_TOKEN" "-Dsonar.host.url=$env:SONAR_HOST_URL" sonar
-
+    - >
+      if ($env:COMPUTERNAME -eq "Andrii") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC;
+        echo "Environment detected: PC"
+      }
+      elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") {$env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP;
+        echo "Environment detected: Laptop"
+      }
+      else {
+        echo "Unknown environment: $env:COMPUTERNAME";
+        exit 1
+      }
+    - ./gradlew.bat test
+    - ./gradlew.bat jacocoTestReport
+    - ./gradlew.bat "-Dsonar.host.url=$env:SONAR_HOST_URL" "-Dsonar.login=$env:SONAR_TOKEN" sonar
   allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$SONAR_ENV == "PC"'
-    - if: '$SONAR_ENV == "Laptop"'
-
 #qodana:
 #  stage: qodana
 #  script:
