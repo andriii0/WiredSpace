@@ -7,6 +7,14 @@ plugins {
 
 }
 
+val computerName = System.getenv("COMPUTERNAME") ?: error("COMPUTERNAME не задан!")
+
+val sonarToken = when (computerName) {
+	"ANDRII" -> System.getenv("SONAR_TOKEN_PC")
+	"DESKTOP-6QK4NA7" -> System.getenv("SONAR_TOKEN_LAPTOP")
+	else -> throw GradleException("Unknown computer name: $computerName")
+}
+
 group = "org.main"
 version = "0.0.1-SNAPSHOT"
 
@@ -32,7 +40,7 @@ sonar {
 		property("sonar.projectKey", "WiredSpace")
 		property("sonar.projectName", "WiredSpace")
 		property("sonar.host.url", "http://localhost:9000")
-		property("sonar.token", "sqa_8e7607b6673c8b17742b7873be6758ba5647b097")
+		property("sonar.token", sonarToken)
 		//property("sonar.junit.reportPaths", "build/test-results/test")
 		//property("sonar.java.coveragePlugin", "jacoco")
 		//property("sonar.jacoco.reportPath", "build/reports/jacoco/test/jacocoTestReport.xml")
