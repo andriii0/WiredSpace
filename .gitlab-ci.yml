@@ -31,7 +31,7 @@ test:
 build-sonar:
   stage: build-sonar
   environment:
-    name: "$CI_RUNNER_DESCRIPTION"
+    name: "PC"
   cache:
     policy: pull-push
     key: "sonar-cache-$CI_COMMIT_REF_SLUG"
