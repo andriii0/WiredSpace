@@ -29,6 +29,7 @@ sonar {
 	properties {
 		property("sonar.projectKey", "Wiredspace")
 		property("sonar.projectName", "Wiredspace")
+		property("sonar.login", project.findProperty("sonar.login") ?: System.getenv("SONAR_TOKEN"))
 		property("sonar.qualitygate.wait", true)
 	}
 }
