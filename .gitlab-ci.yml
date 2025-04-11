@@ -33,6 +33,7 @@ build-sonar:
   script:
     - cd WiredSpace-API
     - echo "Environment:" $env:COMPUTERNAME
+    - echo "Token length:" $env:SONAR_TOKEN.Length
     - ./gradlew.bat test jacocoTestReport
     - ./gradlew.bat "-Dsonar.token=$env:SONAR_TOKEN" "-Dsonar.host.url=$env:SONAR_HOST_URL" sonar
 
