@@ -39,17 +39,15 @@ build-sonar:
   script:
     - cd WiredSpace-API
     - echo "Running SonarQube analysis for environment: $SONAR_ENV"
-    - ./gradlew.bat test jacocoTestReport sonar \
-      -Dsonar.host.url=$SONAR_HOST_URL \
-      -Dsonar.login=$SONAR_TOKEN
+    - ./gradlew.bat test
+    - ./gradlew.bat jacocoTestReport
+    - ./gradlew.bat sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
   allow_failure: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$SONAR_ENV == "PC"'
-    - if: '$SONAR_ENV == "Laptop"'
+    - if: '$
 
 #qodana:
 #  stage: qodana
