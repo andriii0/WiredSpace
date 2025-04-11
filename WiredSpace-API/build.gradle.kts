@@ -38,9 +38,11 @@ sonar {
 		property("sonar.projectKey", "Wiredspace")
 		property("sonar.projectName", "Wiredspace")
 		property("sonar.qualitygate.wait", true)
+		property("sonar.host.url", "http://localhost:9000")
 		property("sonar.java.binaries", "build/classes/java/main")
+		property("sonar.java.test.binaries", "build/classes/java/test")
 		property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
-		property("sonar.junit.reportPaths", "build/test-results/test")
+		property("sonar.junit.reportPaths", "${project.projectDir}/build/test-results/test")
 	}
 }
 
