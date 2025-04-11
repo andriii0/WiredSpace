@@ -32,7 +32,8 @@ sonar {
 		property("sonar.projectName", "Wiredspace")
 		property("sonar.qualitygate.wait", true)
 		property("sonar.java.binaries", "build/classes")
-		property("sonar.jacoco.reportPaths", "build/jacoco/test.exec")
+		property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
+		property("sonar.junit.reportPaths", "build/test-results/test")
 	}
 }
 

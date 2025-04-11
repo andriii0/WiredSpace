@@ -1,8 +1,8 @@
 image: gradle:8.10.0-jdk17-jammy
 
 stages:
-  - build
-  - test
+  - #build
+  - #test
   - build-sonar
   - qodana
 
