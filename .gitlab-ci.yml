@@ -32,7 +32,7 @@ build-sonar:
   stage: build-sonar
   script:
     - cd WiredSpace-API
-    - echo "Environment: $env:COMPUTERNAME"
+    - echo "Environment:" $env:COMPUTERNAME
     - ./gradlew.bat test jacocoTestReport sonar
 
   allow_failure: true
