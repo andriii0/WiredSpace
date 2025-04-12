@@ -40,18 +40,18 @@ build-sonar:
       - sonar-scanner/
   script:
     - cd WiredSpace-API
-    - >
-      if ($env:COMPUTERNAME -eq "Andrii") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC;
-        echo "Environment detected: PC"
-
-      }
-      elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") {$env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP;
-        echo "Environment detected: Laptop"
-      }
-      else {
-        echo "Unknown environment: $env:COMPUTERNAME";
-        exit 1
-      }
+#    - >
+#      if ($env:COMPUTERNAME -eq "Andrii") { $env:SONAR_TOKEN = $env:SONAR_TOKEN_PC;
+#        echo "Environment detected: PC"
+#
+#      }
+#      elseif ($env:COMPUTERNAME -eq "DESKTOP-6QK4NA7") {$env:SONAR_TOKEN = $env:SONAR_TOKEN_LAPTOP;
+#        echo "Environment detected: Laptop"
+#      }
+#      else {
+#        echo "Unknown environment: $env:COMPUTERNAME";
+#        exit 1
+#      }
     - echo "TOKEN:" $env:SONAR_TOKEN
     - echo "TOKEN LENGTH:" $env:SONAR_TOKEN.length
     - echo "ALL ENV VARS:"
