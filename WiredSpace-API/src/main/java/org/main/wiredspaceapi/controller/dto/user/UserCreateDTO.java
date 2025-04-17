@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.dto;
+package org.main.wiredspaceapi.controller.dto.user;
 
 import jakarta.persistence.Enumerated;
 import lombok.Data;

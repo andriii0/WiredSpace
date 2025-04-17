@@ -3,8 +3,8 @@ package org.main.wiredspaceapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.domain.User;
-import org.main.wiredspaceapi.dto.UserDTO;
-import org.main.wiredspaceapi.dto.UserCreateDTO;
+import org.main.wiredspaceapi.controller.dto.user.UserDTO;
+import org.main.wiredspaceapi.controller.dto.user.UserCreateDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.persistence.impl;
+package org.main.wiredspaceapi.persistence.impl.user;
 
 import org.main.wiredspaceapi.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.dto;
+package org.main.wiredspaceapi.controller.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
