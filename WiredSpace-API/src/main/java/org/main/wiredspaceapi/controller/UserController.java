@@ -1,5 +1,6 @@
 package org.main.wiredspaceapi.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.domain.User;
@@ -28,16 +29,16 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        Optional<User> userOptional = userService.getUserById(id);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
+        try {
+            User user = userService.getUserById(id);
             UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getRole());
             return ResponseEntity.ok(userDTO);
-        } else {
+
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {

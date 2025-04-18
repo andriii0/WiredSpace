@@ -1,5 +1,6 @@
 package org.main.wiredspaceapi.business.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.domain.User;
@@ -10,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +27,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepository.getUserById(id);
+    public User getUserById(Long id) {
+        return userRepository.getUserById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
+
 
     @Override
     public List<User> getAllUsers() {

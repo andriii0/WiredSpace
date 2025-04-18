@@ -1,5 +1,6 @@
 package org.main.wiredspaceapi;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,20 +55,17 @@ class UserServiceTest {
     void getUserById_ShouldReturnUser_WhenUserExists() {
         when(userRepository.getUserById(1L)).thenReturn(Optional.of(user));
 
-        Optional<User> foundUser = userService.getUserById(1L);
+        User foundUser = userService.getUserById(1L);
 
-        assertTrue(foundUser.isPresent());
-        assertEquals("TestUser", foundUser.get().getName());
+        assertNotNull(foundUser);
+        assertEquals("TestUser", foundUser.getName());
         verify(userRepository, times(1)).getUserById(1L);
     }
 
     @Test
-    void getUserById_ShouldReturnEmpty_WhenUserNotExists() {
+    void getUserById_ShouldThrowEntityNotFoundException_WhenUserNotExists() {
         when(userRepository.getUserById(1L)).thenReturn(Optional.empty());
-
-        Optional<User> foundUser = userService.getUserById(1L);
-
-        assertFalse(foundUser.isPresent());
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserById(1L));
         verify(userRepository, times(1)).getUserById(1L);
     }
 
