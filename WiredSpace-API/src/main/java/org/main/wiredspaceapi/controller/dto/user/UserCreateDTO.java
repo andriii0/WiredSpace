@@ -8,6 +8,5 @@ import org.main.wiredspaceapi.domain.enums.UserRole;
 public class UserCreateDTO {
     private String name;
     private String password;
-    @Enumerated
     private UserRole role = UserRole.STANDARD_USER;
 }
