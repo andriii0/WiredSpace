@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.controller;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
+import org.main.wiredspaceapi.controller.converter.AccountMapper;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserCreateDTO;
@@ -20,38 +21,36 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
+    private final AccountMapper accountMapper;
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO userCreateDTO) {
         User user = userService.createUser(userCreateDTO.getName(), userCreateDTO.getPassword(), userCreateDTO.getRole());
-        return ResponseEntity.ok(new UserDTO(user.getId(), user.getName(), user.getRole()));
+        return ResponseEntity.ok(accountMapper.userToUserDTO(user));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         try {
             User user = userService.getUserById(id);
-            UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getRole());
-            return ResponseEntity.ok(userDTO);
-
+            return ResponseEntity.ok(accountMapper.userToUserDTO(user));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers().stream()
-                .map(user -> new UserDTO(user.getId(), user.getName(), user.getRole()))
+                .map(accountMapper::userToUserDTO)
                 .collect(Collectors.toList());
-            return ResponseEntity.ok(users);
+        return ResponseEntity.ok(users);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserCreateDTO userCreateDTO) {
         User updatedUser = userService.updateUser(id, userCreateDTO.getName(), userCreateDTO.getPassword(), userCreateDTO.getRole());
-        return ResponseEntity.ok(new UserDTO(updatedUser.getId(), updatedUser.getName(), updatedUser.getRole()));
+        return ResponseEntity.ok(accountMapper.userToUserDTO(updatedUser));
     }
 
     @DeleteMapping("/{id}")

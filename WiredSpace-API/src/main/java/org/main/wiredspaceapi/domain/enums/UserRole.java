@@ -1,7 +1,7 @@
 package org.main.wiredspaceapi.domain.enums;
 
 public enum UserRole {
-    STANDARD_USER,
+    STANDART_USER,
     PREMIUM_USER,
     VIP
 }
