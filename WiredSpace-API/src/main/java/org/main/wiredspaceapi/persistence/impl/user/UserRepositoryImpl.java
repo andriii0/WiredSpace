@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.main.wiredspaceapi.persistence.entity.UserEntity;
+import org.main.wiredspaceapi.persistence.mapper.AccountMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,48 +16,57 @@ import java.util.Optional;
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserDB userDB;
+    private final AccountMapper accountMapper;
 
     @Override
     public User createUser(String name, String password) {
-        return userDB.save(new User(name, password, UserRole.STANDARD_USER));
+        return createUser(name, password, UserRole.STANDARD_USER);
     }
 
     @Override
     public User createUser(String name, String password, UserRole userRole) {
-        return userDB.save(new User(name, password, userRole));
+        User domainUser = new User(name, password, userRole);
+        UserEntity entity = accountMapper.toEntity(domainUser);
+        UserEntity saved = userDB.save(entity);
+        return accountMapper.toDomain(saved);
     }
+
     @Override
     public Optional<User> findByName(String name) {
-        return userDB.findByName(name);
+        return userDB.findByName(name)
+                .map(accountMapper::toDomain);
     }
 
     @Override
     public Optional<User> getUserById(Long id) {
-        return userDB.findById(id);
+        return userDB.findById(id)
+                .map(accountMapper::toDomain);
     }
 
     @Override
     public List<User> getAllUsers() {
-        return userDB.findAll();
+        return userDB.findAll().stream()
+                .map(accountMapper::toDomain)
+                .toList();
     }
 
     @Override
-    public User updateUser(Long id, String name, String password) {
+    public Optional<User> updateUser(Long id, String name, String password) {
         return updateUser(id, name, password, null);
     }
 
     @Override
-    public User updateUser(Long id, String name, String password, UserRole userRole) {
+    public Optional<User> updateUser(Long id, String name, String password, UserRole userRole) {
         return userDB.findById(id)
-                .map(user -> {
-                    user.setName(name);
-                    user.setPassword(password);
+                .map(entity -> {
+                    entity.setName(name);
+                    entity.setPassword(password);
                     if (userRole != null) {
-                        user.setRole(userRole);
+                        entity.setRole(userRole);
                     }
-                    return userDB.save(user);
-                })
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                    UserEntity updated = userDB.save(entity);
+                    return accountMapper.toDomain(updated);
+                });
     }
 
     @Override

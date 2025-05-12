@@ -12,8 +12,7 @@ public interface UserRepository {
     Optional<User> getUserById(Long id);
     List<User> getAllUsers();
     Optional<User> findByName(String name);
-    User updateUser(Long id, String name, String password);
-    User updateUser(Long id, String name, String password, UserRole userRole);
+    Optional<User> updateUser(Long id, String name, String password);
+    Optional<User> updateUser(Long id, String name, String password, UserRole userRole);
     void deleteUser(Long id);
-
 }
