@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
+    @Override
+    public User findUserByName(String name){
+        return userRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("User not found with name: " + name));
+    }
 
     @Override
     public List<User> getAllUsers() {
@@ -39,12 +44,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long id, String name, String password) {
+    public Optional<User> updateUser(Long id, String name, String password) {
         return userRepository.updateUser(id, name, password);
     }
 
     @Override
-    public User updateUser(Long id, String name, String password, UserRole userRole) {
+    public Optional<User> updateUser(Long id, String name, String password, UserRole userRole) {
         return userRepository.updateUser(id, name, password, userRole);
     }
 

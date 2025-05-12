@@ -82,9 +82,9 @@ class UserServiceTest {
 
     @Test
     void updateUser_ShouldReturnUpdatedUser() {
-        when(userRepository.updateUser(1L, "NewName", "newPass")).thenReturn(user);
+        when(userRepository.updateUser(1L, "NewName", "newPass")).thenReturn(Optional.ofNullable(user));
 
-        User updatedUser = userService.updateUser(1L, "NewName", "newPass");
+        Optional<User> updatedUser = userService.updateUser(1L, "NewName", "newPass");
 
         assertNotNull(updatedUser);
         verify(userRepository, times(1)).updateUser(1L, "NewName", "newPass");
