@@ -21,7 +21,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        User user = userService.findUserByName(request.username());
+        User user = userService.findUserByEmail(request.email());
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");

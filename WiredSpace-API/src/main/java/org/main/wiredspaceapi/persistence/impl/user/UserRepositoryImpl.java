@@ -5,7 +5,7 @@ import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.persistence.entity.UserEntity;
-import org.main.wiredspaceapi.persistence.mapper.AccountMapper;
+import org.main.wiredspaceapi.persistence.mapper.AccountEntityMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,24 +16,19 @@ import java.util.Optional;
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserDB userDB;
-    private final AccountMapper accountMapper;
+    private final AccountEntityMapper accountMapper;
 
     @Override
-    public User createUser(String name, String password) {
-        return createUser(name, password, UserRole.STANDARD_USER);
-    }
-
-    @Override
-    public User createUser(String name, String password, UserRole userRole) {
-        User domainUser = new User(name, password, userRole);
-        UserEntity entity = accountMapper.toEntity(domainUser);
+    public User createUser(String name, String email, String password, UserRole userRole) {
+        User user = new User(name, email, password, userRole);
+        UserEntity entity = accountMapper.toEntity(user);
         UserEntity saved = userDB.save(entity);
         return accountMapper.toDomain(saved);
     }
 
     @Override
-    public Optional<User> findByName(String name) {
-        return userDB.findByName(name)
+    public Optional<User> findByEmail(String email) {
+        return userDB.findByEmail(email)
                 .map(accountMapper::toDomain);
     }
 
@@ -51,22 +46,22 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String password) {
-        return updateUser(id, name, password, null);
+    public Optional<User> updateUser(Long id, String name, String email, String password) {
+        return updateUser(id, name, email, password, null);
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String password, UserRole userRole) {
-        return userDB.findById(id)
-                .map(entity -> {
-                    entity.setName(name);
-                    entity.setPassword(password);
-                    if (userRole != null) {
-                        entity.setRole(userRole);
-                    }
-                    UserEntity updated = userDB.save(entity);
-                    return accountMapper.toDomain(updated);
-                });
+    public Optional<User> updateUser(Long id, String name, String email, String password, UserRole userRole) {
+        return userDB.findById(id).map(entity -> {
+            entity.setName(name);
+            entity.setEmail(email);
+            entity.setPassword(password);
+            if (userRole != null) {
+                entity.setRole(userRole);
+            }
+            UserEntity updated = userDB.save(entity);
+            return accountMapper.toDomain(updated);
+        });
     }
 
     @Override

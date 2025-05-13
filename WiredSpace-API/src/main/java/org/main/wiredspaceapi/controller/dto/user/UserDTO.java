@@ -11,5 +11,6 @@ import org.main.wiredspaceapi.domain.enums.UserRole;
 public class UserDTO {
     private Long id;
     private String name;
+    private String email;
     private UserRole role;
 }

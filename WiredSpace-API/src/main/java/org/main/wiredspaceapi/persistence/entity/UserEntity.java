@@ -5,7 +5,7 @@ import lombok.*;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +17,8 @@ public class UserEntity {
     private Long id;
 
     private String name;
+
+    private String email;
 
     private String password;
 

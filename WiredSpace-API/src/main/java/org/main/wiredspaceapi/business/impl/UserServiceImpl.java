@@ -6,9 +6,8 @@ import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +19,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Override
+    public User createUser(String name, String email, String password) {
+        String encodedPassword = passwordEncoder.encode(password);
+        return userRepository.createUser(name, email, encodedPassword, UserRole.STANDARD_USER);
+    }
 
     @Override
-    public User createUser(String name, String password, UserRole userRole) {
+    public User createUser(String name, String email, String password, UserRole userRole) {
         String encodedPassword = passwordEncoder.encode(password);
-        return userRepository.createUser(name, encodedPassword, userRole);
+        return userRepository.createUser(name, email, encodedPassword, userRole);
     }
 
     @Override
@@ -34,8 +38,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findUserByName(String name){
-        return userRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("User not found with name: " + name));
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
     }
 
     @Override
@@ -44,13 +49,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String password) {
-        return userRepository.updateUser(id, name, password);
+    public Optional<User> updateUser(Long id, String name, String email, String password) {
+        String encodedPassword = passwordEncoder.encode(password);
+        return userRepository.updateUser(id, name, email, encodedPassword);
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String password, UserRole userRole) {
-        return userRepository.updateUser(id, name, password, userRole);
+    public Optional<User> updateUser(Long id, String name, String email, String password, UserRole userRole) {
+        String encodedPassword = passwordEncoder.encode(password);
+        return userRepository.updateUser(id, name, email, encodedPassword, userRole);
     }
 
     @Override

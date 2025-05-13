@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository {
-    User createUser(String name, String password);
-    User createUser(String name, String password, UserRole userRole);
+    User createUser(String name, String email, String password, UserRole userRole);
     Optional<User> getUserById(Long id);
     List<User> getAllUsers();
-    Optional<User> findByName(String name);
-    Optional<User> updateUser(Long id, String name, String password);
-    Optional<User> updateUser(Long id, String name, String password, UserRole userRole);
+    Optional<User> findByEmail(String email);
+    Optional<User> updateUser(Long id, String name, String email, String password);
+    Optional<User> updateUser(Long id, String name, String email, String password, UserRole userRole);
     void deleteUser(Long id);
 }

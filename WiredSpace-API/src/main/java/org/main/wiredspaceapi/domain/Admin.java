@@ -18,8 +18,8 @@ public class Admin extends Account {
     @Enumerated(EnumType.STRING)
     private AdminRole role;
 
-    public Admin(String name, String password, AdminRole role) {
-        super(null, name, password);
+    public Admin(String name, String password, String email, AdminRole role) {
+        super(null, name, email, password);
         this.role = role;
     }
 }

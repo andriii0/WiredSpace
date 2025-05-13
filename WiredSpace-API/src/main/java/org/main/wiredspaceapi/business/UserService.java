@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    User createUser(String name, String password, UserRole userRole);
+    User createUser(String name, String email, String password);
+    User createUser(String name, String email, String password, UserRole userRole);
     User getUserById(Long id);
-    User findUserByName(String name);
+    User findUserByEmail(String email);
     List<User> getAllUsers();
-    Optional<User> updateUser(Long id, String name, String password);
-    Optional<User> updateUser(Long id, String name, String password, UserRole userRole);
+    Optional<User> updateUser(Long id, String name, String email, String password);
+    Optional<User> updateUser(Long id, String name, String email, String password, UserRole userRole);
     void deleteUser(Long id);
 }

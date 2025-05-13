@@ -13,8 +13,8 @@ public class User extends Account {
     @Enumerated
     private UserRole role;
 
-    public User(String name, String password, UserRole role) {
-        super(null, name, password);
+    public User(String name, String email, String password, UserRole role) {
+        super(null, name, email, password);
         this.role = role;
     }
 }
