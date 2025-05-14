@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.security;
+package org.main.wiredspaceapi.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
