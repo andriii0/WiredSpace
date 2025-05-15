@@ -3,7 +3,7 @@ package org.main.wiredspaceapi.controller;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
-import org.main.wiredspaceapi.controller.converter.AccountMapper;
+import org.main.wiredspaceapi.controller.converter.UserMapper;
 import org.main.wiredspaceapi.controller.dto.user.UserCreateDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 import org.main.wiredspaceapi.domain.User;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
-    private final AccountMapper accountMapper;
+    private final UserMapper userMapper;
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO userCreateDTO) {
@@ -31,14 +31,14 @@ public class UserController {
                 userCreateDTO.getPassword(),
                 userCreateDTO.getRole()
         );
-        return ResponseEntity.ok(accountMapper.userToUserDTO(user));
+        return ResponseEntity.ok(userMapper.userToUserDTO(user));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
         try {
             User user = userService.getUserById(id);
-            return ResponseEntity.ok(accountMapper.userToUserDTO(user));
+            return ResponseEntity.ok(userMapper.userToUserDTO(user));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -47,7 +47,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers().stream()
-                .map(accountMapper::userToUserDTO)
+                .map(userMapper::userToUserDTO)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(users);
     }
@@ -61,7 +61,7 @@ public class UserController {
                         userCreateDTO.getPassword(),
                         userCreateDTO.getRole()
                 )
-                .map(user -> ResponseEntity.ok(accountMapper.userToUserDTO(user)))
+                .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 

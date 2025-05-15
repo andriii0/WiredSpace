@@ -15,5 +15,5 @@ public interface UserService {
     List<User> getAllUsers();
     Optional<User> updateUser(UUID id, String name, String email, String password);
     Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole);
-    void deleteUser(UUID id);
+    void deleteUser(UUID id); //TODO boolean not void
 }
