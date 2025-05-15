@@ -12,5 +12,5 @@ import java.util.*;
 public class AccessToken {
     private String subject;
     private UUID accountId;
-    //private final Set<String> roles;
+    private final Set<String> roles;
 }

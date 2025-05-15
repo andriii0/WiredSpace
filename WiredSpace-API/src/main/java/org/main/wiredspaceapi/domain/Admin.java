@@ -16,4 +16,9 @@ public class Admin extends Account {
         super(null, name, email, password);
         this.role = role;
     }
+
+    @Override
+    public String getRoleAsString() {
+        return "ROLE_" + role.name();
+    }
 }

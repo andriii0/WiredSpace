@@ -69,17 +69,25 @@ public class AccessTokenEncoderDecoderImpl implements TokenEncoder, TokenDecoder
 
     private void populateClaims(AccessToken token, Map<String, Object> claimsMap) {
         if (token.getAccountId() != null) {
-            claimsMap.put(CLAIM_USER_ID, token.getAccountId());
+            claimsMap.put("userId", token.getAccountId().toString());
+        }
+        if (token.getRoles() != null && !token.getRoles().isEmpty()) {
+            claimsMap.put("roles", token.getRoles());  // Список строк: ["ROLE_STANDARD_USER"]
         }
     }
+
 
     private AccessToken createTokenFromClaims(Claims claims) {
         String subject = claims.getSubject();
         UUID accountId = UUID.fromString(claims.get(CLAIM_USER_ID, String.class));
 
+        List<String> rolesList = claims.get(CLAIM_ROLES, List.class);
+        Set<String> roles = rolesList != null ? new HashSet<>(rolesList) : Set.of();
+
         return AccessToken.builder()
                 .subject(subject)
                 .accountId(accountId)
+                .roles(roles)
                 .build();
     }
 }
