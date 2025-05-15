@@ -5,13 +5,13 @@ import lombok.*;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 
 @Entity
-@Table(name = "user_accounts")
+@DiscriminatorValue("USER")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity extends AccountEntity {
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated
     private UserRole role;
 }

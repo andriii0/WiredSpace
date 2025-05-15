@@ -1,17 +1,13 @@
 package org.main.wiredspaceapi.persistence.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import jakarta.persistence.*;
+import lombok.*;
 import java.util.UUID;
 
-@MappedSuperclass
+@Entity
+@Table(name = "accounts")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "account_type")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +15,7 @@ import java.util.UUID;
 public abstract class AccountEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String name;

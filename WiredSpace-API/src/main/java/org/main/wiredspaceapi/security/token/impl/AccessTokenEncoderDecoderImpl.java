@@ -20,7 +20,7 @@ import java.util.*;
 
 @Service
 public class AccessTokenEncoderDecoderImpl implements TokenEncoder, TokenDecoder {
-    private static final String CLAIM_ROLES = "roles";
+    private static final String CLAIM_ROLES = "role";
     private static final String CLAIM_USER_ID = "userId";
 
     private final Key key;
@@ -69,25 +69,22 @@ public class AccessTokenEncoderDecoderImpl implements TokenEncoder, TokenDecoder
 
     private void populateClaims(AccessToken token, Map<String, Object> claimsMap) {
         if (token.getAccountId() != null) {
-            claimsMap.put("userId", token.getAccountId().toString());
+            claimsMap.put(CLAIM_USER_ID, token.getAccountId().toString());
         }
-        if (token.getRoles() != null && !token.getRoles().isEmpty()) {
-            claimsMap.put("roles", token.getRoles());  // Список строк: ["ROLE_STANDARD_USER"]
+        if (token.getRole() != null && !token.getRole().isEmpty()) {
+            claimsMap.put(CLAIM_ROLES, token.getRole());  // single String
         }
     }
-
 
     private AccessToken createTokenFromClaims(Claims claims) {
         String subject = claims.getSubject();
         UUID accountId = UUID.fromString(claims.get(CLAIM_USER_ID, String.class));
-
-        List<String> rolesList = claims.get(CLAIM_ROLES, List.class);
-        Set<String> roles = rolesList != null ? new HashSet<>(rolesList) : Set.of();
+        String role = claims.get(CLAIM_ROLES, String.class);
 
         return AccessToken.builder()
                 .subject(subject)
                 .accountId(accountId)
-                .roles(roles)
+                .role(role)
                 .build();
     }
 }

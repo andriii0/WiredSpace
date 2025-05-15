@@ -10,8 +10,8 @@ import java.util.UUID;
 public interface UserService {
     User createUser(String name, String email, String password);
     User createUser(String name, String email, String password, UserRole userRole);
-    User getUserById(UUID id);
-    User findUserByEmail(String email);
+    Optional<User>  getUserById(UUID id);
+    Optional<User> findByEmail(String email);
     List<User> getAllUsers();
     Optional<User> updateUser(UUID id, String name, String email, String password);
     Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole);

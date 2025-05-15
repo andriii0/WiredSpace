@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,12 +37,9 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
-        try {
-            User user = userService.getUserById(id);
-            return ResponseEntity.ok(userMapper.userToUserDTO(user));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return userService.getUserById(id)
+                .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping

@@ -56,17 +56,32 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
     }
 
     private void setupSpringSecurityContext(AccessToken accessToken) {
-        List<SimpleGrantedAuthority> authorities = accessToken.getRoles().stream()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+        String rawRole = accessToken.getRole();
+        if (rawRole == null || rawRole.isBlank()) {
+            // Без роли – аутентификация, но без прав
+            SecurityContextHolder.clearContext();
+            return;
+        }
 
-        UserDetails userDetails = new User(accessToken.getSubject(), "", authorities);
+        // Гарантируем, что в authority всегда будет "ROLE_..." – strip/dedup
+        String normalized = rawRole.startsWith("ROLE_")
+                ? rawRole
+                : "ROLE_" + rawRole;
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(normalized);
+        List<SimpleGrantedAuthority> authorities = List.of(authority);
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(accessToken.getSubject())
+                .password("")          // пароль не нужен при JWT
+                .authorities(authorities)
+                .build();
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
         authentication.setDetails(accessToken);
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-
 
 }

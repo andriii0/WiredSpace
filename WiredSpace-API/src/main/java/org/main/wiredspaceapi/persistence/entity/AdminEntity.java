@@ -5,13 +5,13 @@ import lombok.*;
 import org.main.wiredspaceapi.domain.enums.AdminRole;
 
 @Entity
-@Table(name = "admins")
+@DiscriminatorValue("ADMIN")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminEntity extends AccountEntity {
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated
     private AdminRole role;
 }
