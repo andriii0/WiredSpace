@@ -1,6 +1,7 @@
 package org.main.wiredspaceapi.business.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,12 +13,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        User user = userService.findUserByEmail(email);
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())

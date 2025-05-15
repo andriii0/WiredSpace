@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserById(Long id) {
+    public User getUserById(UUID id) {
         return userRepository.getUserById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
@@ -49,19 +50,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String email, String password) {
+    public Optional<User> updateUser(UUID id, String name, String email, String password) {
         String encodedPassword = passwordEncoder.encode(password);
         return userRepository.updateUser(id, name, email, encodedPassword);
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String email, String password, UserRole userRole) {
+    public Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole) {
         String encodedPassword = passwordEncoder.encode(password);
         return userRepository.updateUser(id, name, email, encodedPassword, userRole);
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(UUID id) {
         userRepository.deleteUser(id);
     }
 }

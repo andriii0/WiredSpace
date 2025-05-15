@@ -1,6 +1,9 @@
 package org.main.wiredspaceapi.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.main.wiredspaceapi.business.UserService;
+import org.main.wiredspaceapi.domain.User;
+import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.security.token.AccessToken;
 import org.main.wiredspaceapi.security.token.TokenEncoder;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +14,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/api/login")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final TokenEncoder accessTokenEncoder;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<?> authenticate(@RequestParam String email, @RequestParam String password) {
@@ -25,13 +29,13 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(email, password)
             );
 
-            String subject = authentication.getName();
-            Object userIdObj = authentication.getDetails();
+            User user = userService.findUserByEmail(email);
+
+            ((UsernamePasswordAuthenticationToken) authentication).setDetails(user.getId());
 
             AccessToken token = AccessToken.builder()
-                    .subject(subject)
-                    .accountId((userIdObj instanceof String) ? java.util.UUID.fromString((String) userIdObj)
-                            : (java.util.UUID) userIdObj)
+                    .subject(email)
+                    .accountId(user.getId())
                     .build();
 
             String jwt = accessTokenEncoder.encode(token);

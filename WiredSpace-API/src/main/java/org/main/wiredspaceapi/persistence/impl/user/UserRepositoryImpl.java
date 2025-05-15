@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> getUserById(UUID id) {
         return userDB.findById(id)
                 .map(accountMapper::toDomain);
     }
@@ -46,12 +47,12 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String email, String password) {
+    public Optional<User> updateUser(UUID id, String name, String email, String password) {
         return updateUser(id, name, email, password, null);
     }
 
     @Override
-    public Optional<User> updateUser(Long id, String name, String email, String password, UserRole userRole) {
+    public Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole) {
         return userDB.findById(id).map(entity -> {
             entity.setName(name);
             entity.setEmail(email);
@@ -65,7 +66,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(UUID id) {
         userDB.deleteById(id);
     }
 }

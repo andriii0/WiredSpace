@@ -15,7 +15,6 @@ import org.main.wiredspaceapi.domain.enums.AdminRole;
 @NoArgsConstructor
 public class Admin extends Account {
 
-    @Enumerated(EnumType.STRING)
     private AdminRole role;
 
     public Admin(String name, String password, String email, AdminRole role) {

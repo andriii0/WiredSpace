@@ -5,13 +5,14 @@ import org.main.wiredspaceapi.domain.enums.UserRole;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserRepository {
     User createUser(String name, String email, String password, UserRole userRole);
-    Optional<User> getUserById(Long id);
+    Optional<User> getUserById(UUID id);
     List<User> getAllUsers();
     Optional<User> findByEmail(String email);
-    Optional<User> updateUser(Long id, String name, String email, String password);
-    Optional<User> updateUser(Long id, String name, String email, String password, UserRole userRole);
-    void deleteUser(Long id);
+    Optional<User> updateUser(UUID id, String name, String email, String password);
+    Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole);
+    void deleteUser(UUID id);
 }
