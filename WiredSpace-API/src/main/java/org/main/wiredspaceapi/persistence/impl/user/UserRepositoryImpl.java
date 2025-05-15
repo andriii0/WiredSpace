@@ -5,7 +5,7 @@ import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.persistence.entity.UserEntity;
-import org.main.wiredspaceapi.persistence.mapper.AccountEntityMapper;
+import org.main.wiredspaceapi.persistence.mapper.UserEntityMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.UUID;
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserDB userDB;
-    private final AccountEntityMapper accountMapper;
+    private final UserEntityMapper accountMapper;
 
     @Override
     public User createUser(String name, String email, String password, UserRole userRole) {

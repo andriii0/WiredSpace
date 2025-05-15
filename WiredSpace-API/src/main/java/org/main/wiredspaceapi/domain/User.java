@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor

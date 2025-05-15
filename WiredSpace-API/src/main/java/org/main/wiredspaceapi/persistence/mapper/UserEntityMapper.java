@@ -5,7 +5,7 @@ import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.persistence.entity.UserEntity;
 
 @Mapper(componentModel = "spring")
-public interface AccountEntityMapper {
+public interface UserEntityMapper {
     User toDomain(UserEntity entity);
     UserEntity toEntity(User domain);
 }
