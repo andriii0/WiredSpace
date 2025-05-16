@@ -21,16 +21,16 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User createUser(String name, String email, String password) {
-        String encodedPassword = passwordEncoder.encode(password);
-        return userRepository.createUser(name, email, encodedPassword, UserRole.STANDARD_USER);
-    }
-
-    @Override
     public User createUser(String name, String email, String password, UserRole userRole) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Email " + email + " is already in use");
+        }
+
         String encodedPassword = passwordEncoder.encode(password);
         return userRepository.createUser(name, email, encodedPassword, userRole);
     }
+
 
     @Override
     public Optional<User> getUserById(UUID id) {
@@ -49,19 +49,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> updateUser(UUID id, String name, String email, String password) {
-        String encodedPassword = passwordEncoder.encode(password);
-        return userRepository.updateUser(id, name, email, encodedPassword);
+    public Optional<User> updateUserByEmail(String currentEmail, String newName, String newEmail, String newPassword) {
+        Optional<User> userOptional = userRepository.findByEmail(currentEmail);
+        if (userOptional.isEmpty()) return Optional.empty();
+
+        User user = userOptional.get();
+
+        String nameToSet = (newName != null && !newName.trim().isEmpty()) ? newName : user.getName();
+        String emailToSet = (newEmail != null && !newEmail.trim().isEmpty()) ? newEmail : user.getEmail();
+        String passwordToSet = (newPassword != null && !newPassword.trim().isEmpty()) ?
+                passwordEncoder.encode(newPassword) : user.getPassword();
+
+        return userRepository.updateUser(user.getId(), nameToSet, emailToSet, passwordToSet);
     }
 
-    @Override
-    public Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole) {
-        String encodedPassword = passwordEncoder.encode(password);
-        return userRepository.updateUser(id, name, email, encodedPassword, userRole);
-    }
 
-    @Override
     public void deleteUser(UUID id) {
         userRepository.deleteUser(id);
+    }
+
+    @Override
+    public void deleteUserByEmail(String email) {
+        userRepository.deleteUserByEmail(email);
     }
 }

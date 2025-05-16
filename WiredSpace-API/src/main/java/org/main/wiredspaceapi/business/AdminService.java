@@ -19,7 +19,5 @@ public interface AdminService {
     //Service Part
     Optional<User> getUserById(UUID id);
     Optional<User> getUserByEmail(String email);
-    Optional<User> updateUser(UUID id, String name, String email);
-    Optional<User> updateUser(UUID id, String name, String email, UserRole userRole);
     boolean deleteUser(UUID uuid);
 }

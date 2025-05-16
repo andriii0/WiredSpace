@@ -8,12 +8,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserService {
-    User createUser(String name, String email, String password);
     User createUser(String name, String email, String password, UserRole userRole);
     Optional<User>  getUserById(UUID id);
     Optional<User> findByEmail(String email);
     List<User> getAllUsers();
-    Optional<User> updateUser(UUID id, String name, String email, String password);
-    Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole);
-    void deleteUser(UUID id); //TODO boolean not void
+    Optional<User> updateUserByEmail(String currentEmail, String newName, String newEmail, String newPassword);
+    void deleteUserByEmail(String email); //TODO boolean not void
 }

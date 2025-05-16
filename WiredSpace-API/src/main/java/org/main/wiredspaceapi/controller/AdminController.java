@@ -54,30 +54,30 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
-    @PutMapping("/user/{id}")
-    public ResponseEntity<User> updateUser(
-            @PathVariable UUID id,
-            @RequestParam String name,
-            @RequestParam String email
-    ) {
-        return adminService.updateUser(id, name, email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
+//    @PutMapping("/user/{id}")
+//    public ResponseEntity<User> updateUser(
+//            @PathVariable UUID id,
+//            @RequestParam String name,
+//            @RequestParam String email
+//    ) {
+//        return adminService.updateUser(id, name, email)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
-    @PutMapping("/user/{id}/role")
-    public ResponseEntity<User> updateUserWithRole(
-            @PathVariable UUID id,
-            @RequestParam String name,
-            @RequestParam String email,
-            @RequestParam UserRole role
-    ) {
-        return adminService.updateUser(id, name, email, role)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
+//    @PutMapping("/user/{id}/role")
+//    public ResponseEntity<User> updateUserWithRole(
+//            @PathVariable UUID id,
+//            @RequestParam String name,
+//            @RequestParam String email,
+//            @RequestParam UserRole role
+//    ) {
+//        return adminService.updateUser(id, name, email, role)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
     @DeleteMapping("/user/{id}")

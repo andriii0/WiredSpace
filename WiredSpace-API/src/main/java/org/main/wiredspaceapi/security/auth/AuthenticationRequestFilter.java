@@ -58,12 +58,10 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
     private void setupSpringSecurityContext(AccessToken accessToken) {
         String rawRole = accessToken.getRole();
         if (rawRole == null || rawRole.isBlank()) {
-            // Без роли – аутентификация, но без прав
             SecurityContextHolder.clearContext();
             return;
         }
 
-        // Гарантируем, что в authority всегда будет "ROLE_..." – strip/dedup
         String normalized = rawRole.startsWith("ROLE_")
                 ? rawRole
                 : "ROLE_" + rawRole;
@@ -73,7 +71,7 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
 
         UserDetails userDetails = org.springframework.security.core.userdetails.User
                 .withUsername(accessToken.getSubject())
-                .password("")          // пароль не нужен при JWT
+                .password("")
                 .authorities(authorities)
                 .build();
 

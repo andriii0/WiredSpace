@@ -16,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,25 +35,30 @@ public class AuthController {
     public ResponseEntity<?> authenticate(@RequestParam String email,
                                           @RequestParam String password) {
         try {
-            // 1) Сам факт пароля проверит Spring через DaoAuthenticationProvider
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
 
-            // 2) После этого — ищем сначала в User, потом в Admin
             Optional<User> userOpt = userService.findByEmail(email);
             if (userOpt.isPresent()) {
                 User u = userOpt.get();
-                return ResponseEntity.ok(createJwt(u.getEmail(), u.getId(), u.getRoleAsString()));
+                String token = createJwt(u.getEmail(), u.getId(), u.getRoleAsString());
+                Map<String, String> response = new HashMap<>();
+                response.put("token", token);
+                response.put("role", u.getRoleAsString());
+                return ResponseEntity.ok(response);
             }
 
             Optional<Admin> adminOpt = adminService.findAdminByEmail(email);
             if (adminOpt.isPresent()) {
                 Admin a = adminOpt.get();
-                return ResponseEntity.ok(createJwt(a.getEmail(), a.getId(), a.getRoleAsString()));
+                String token = createJwt(a.getEmail(), a.getId(), a.getRoleAsString());
+                Map<String, String> response = new HashMap<>();
+                response.put("token", token);
+                response.put("role", a.getRoleAsString());
+                return ResponseEntity.ok(response);
             }
 
-            // 3) Если нет ни там, ни там — 404
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Account not found");
 
@@ -60,6 +67,7 @@ public class AuthController {
                     .body("Invalid email or password");
         }
     }
+
 
     private String createJwt(String subject, UUID accountId, String role) {
         AccessToken token = AccessToken.builder()

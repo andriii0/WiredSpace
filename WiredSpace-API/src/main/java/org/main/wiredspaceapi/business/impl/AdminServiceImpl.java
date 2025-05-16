@@ -64,24 +64,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Optional<User> updateUser(UUID id, String name, String email) {
-        Optional<User> existingUserOpt = userRepository.getUserById(id);
-        if (existingUserOpt.isEmpty()) return Optional.empty();
-
-        User existingUser = existingUserOpt.get();
-        return userRepository.updateUser(id, name, email, existingUser.getPassword());
-    }
-
-    @Override
-    public Optional<User> updateUser(UUID id, String name, String email, UserRole userRole) {
-        Optional<User> existingUserOpt = userRepository.getUserById(id);
-        if (existingUserOpt.isEmpty()) return Optional.empty();
-
-        User existingUser = existingUserOpt.get();
-        return userRepository.updateUser(id, name, email, existingUser.getPassword(), userRole);
-    }
-
-    @Override
     public boolean deleteUser(UUID uuid) {
         Optional<User> user = userRepository.getUserById(uuid);
         if (user.isEmpty()) return false;

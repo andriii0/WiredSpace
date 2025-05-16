@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/users/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/users").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/api/users/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(configure -> configure.authenticationEntryPoint(authenticationEntryPoint))

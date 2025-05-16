@@ -1,13 +1,19 @@
 package org.main.wiredspaceapi.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.controller.converter.UserMapper;
 import org.main.wiredspaceapi.controller.dto.user.UserCreateDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
+import org.main.wiredspaceapi.controller.dto.user.UserUpdateDTO;
 import org.main.wiredspaceapi.domain.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,22 +56,60 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserCreateDTO userCreateDTO) {
-        return userService.updateUser(
-                        id,
-                        userCreateDTO.getName(),
-                        userCreateDTO.getEmail(),
-                        userCreateDTO.getPassword(),
-                        userCreateDTO.getRole()
-                )
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDTO> updateCurrentUser(
+            @RequestBody UserUpdateDTO dto,
+            Authentication authentication
+    ) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = authentication.getName();
+
+        Optional<User> updated = userService.updateUserByEmail(
+                email,
+                dto.getName(),
+                dto.getEmail(),
+                dto.getPassword()
+        );
+
+        return updated
                 .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
+
+
+
+//    @PutMapping("/{id}")
+//    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserCreateDTO userCreateDTO) {
+//        return userService.updateUser(
+//                        id,
+//                        userCreateDTO.getName(),
+//                        userCreateDTO.getEmail(),
+//                        userCreateDTO.getPassword(),
+//                        userCreateDTO.getRole()
+//                )
+//                .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+
+    @Transactional
+    @DeleteMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = authentication.getName();
+        System.out.println("Deleting user: " + email);
+
+        userService.deleteUserByEmail(email);
+
         return ResponseEntity.ok().build();
     }
+
 }

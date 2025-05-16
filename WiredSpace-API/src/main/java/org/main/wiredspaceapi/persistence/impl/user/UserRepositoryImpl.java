@@ -48,18 +48,10 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> updateUser(UUID id, String name, String email, String password) {
-        return updateUser(id, name, email, password, null);
-    }
-
-    @Override
-    public Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole) {
         return userDB.findById(id).map(entity -> {
             entity.setName(name);
             entity.setEmail(email);
             entity.setPassword(password);
-            if (userRole != null) {
-                entity.setRole(userRole);
-            }
             UserEntity updated = userDB.save(entity);
             return accountMapper.toDomain(updated);
         });
@@ -68,5 +60,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void deleteUser(UUID id) {
         userDB.deleteById(id);
+    }
+
+    @Override
+    public void deleteUserByEmail(String email) {
+        userDB.deleteUserByEmail(email);
     }
 }

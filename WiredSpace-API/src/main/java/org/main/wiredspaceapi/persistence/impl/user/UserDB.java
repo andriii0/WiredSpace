@@ -9,4 +9,5 @@ import java.util.UUID;
 
 public interface UserDB extends JpaRepository<UserEntity, UUID> {
     Optional<UserEntity> findByEmail(String email);
+    void deleteUserByEmail(String email);
 }

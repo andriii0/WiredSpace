@@ -13,6 +13,6 @@ public interface UserRepository {
     List<User> getAllUsers();
     Optional<User> findByEmail(String email);
     Optional<User> updateUser(UUID id, String name, String email, String password);
-    Optional<User> updateUser(UUID id, String name, String email, String password, UserRole userRole);
     void deleteUser(UUID id);
+    void deleteUserByEmail(String email);
 }
