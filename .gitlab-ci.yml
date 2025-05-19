@@ -58,4 +58,4 @@ deploy:
   stage: deploy
   script:
     - cd WiredSpace-API
-    - docker compose -f compose.yaml up -d
+    - compose.yaml
