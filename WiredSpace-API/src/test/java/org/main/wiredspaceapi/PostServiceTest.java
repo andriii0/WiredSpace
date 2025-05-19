@@ -14,98 +14,120 @@ import org.main.wiredspaceapi.persistence.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class PostServiceTest {
+class PostServiceTest {
 
     private PostRepository postRepository;
     private UserRepository userRepository;
     private PostServiceImpl postService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         postRepository = mock(PostRepository.class);
         userRepository = mock(UserRepository.class);
         postService = new PostServiceImpl(postRepository, userRepository);
     }
 
     @Test
-    public void testCreatePost_Success() {
-        PostCreateDTO dto = new PostCreateDTO();
-        dto.setContent("Test post");
-        dto.setAuthorId(1L);
+    void createPost_shouldReturnPostDTO_whenUserExists() {
+        // Arrange
+        UUID authorId = UUID.randomUUID();
+        String content = "Test post content";
 
-        User user = new User();
-        user.setId(1L);
-        user.setName("Test User");
+        PostCreateDTO dto = new PostCreateDTO();
+        dto.setAuthorId(authorId);
+        dto.setContent(content);
+
+        User author = new User();
+        author.setId(authorId);
+        author.setName("Test Author");
 
         Post post = Post.builder()
-                .id(1L)
-                .content("Test post")
+                .id(10L)
+                .content(content)
                 .createdAt(LocalDateTime.now())
-                .author(user)
+                .author(author)
                 .build();
 
-        when(userRepository.getUserById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.getUserById(authorId)).thenReturn(Optional.of(author));
         when(postRepository.save(any(Post.class))).thenReturn(post);
 
+        // Act
         PostDTO result = postService.createPost(dto);
 
+        // Assert
         assertNotNull(result);
-        assertEquals("Test post", result.getContent());
-        assertEquals("Test User", result.getAuthorName());
+        assertEquals(post.getContent(), result.getContent());
+        assertEquals(author.getId(), result.getAuthorId());
+
+        verify(userRepository).getUserById(authorId);
+        verify(postRepository).save(any(Post.class));
     }
 
     @Test
-    public void testCreatePost_UserNotFound() {
-        PostCreateDTO dto = new PostCreateDTO();
-        dto.setContent("Test post");
-        dto.setAuthorId(99L);
+    void createPost_shouldThrowException_whenUserNotFound() {
+        UUID invalidAuthorId = UUID.randomUUID();
 
-        when(userRepository.getUserById(99L)).thenReturn(Optional.empty());
+        PostCreateDTO dto = new PostCreateDTO();
+        dto.setAuthorId(invalidAuthorId);
+        dto.setContent("Orphan post");
+
+        when(userRepository.getUserById(invalidAuthorId)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> postService.createPost(dto));
+        verify(postRepository, never()).save(any());
     }
 
     @Test
-    public void testGetAllPosts() {
-        User user = new User();
-        user.setName("User A");
+    void getAllPosts_shouldReturnListOfPostDTOs() {
+        User author = new User();
+        author.setId(UUID.randomUUID());
+        author.setName("Test User");
 
-        Post post1 = Post.builder().id(1L).content("First post").createdAt(LocalDateTime.now()).author(user).build();
-        Post post2 = Post.builder().id(2L).content("Second post").createdAt(LocalDateTime.now()).author(user).build();
+        Post p1 = Post.builder().id(1L).content("Content 1").createdAt(LocalDateTime.now()).author(author).build();
+        Post p2 = Post.builder().id(2L).content("Content 2").createdAt(LocalDateTime.now()).author(author).build();
 
-        when(postRepository.findAll()).thenReturn(List.of(post1, post2));
+        when(postRepository.findAll()).thenReturn(List.of(p1, p2));
 
-        List<PostDTO> results = postService.getAllPosts();
+        List<PostDTO> result = postService.getAllPosts();
 
-        assertEquals(2, results.size());
-        assertEquals("First post", results.get(0).getContent());
-        assertEquals("Second post", results.get(1).getContent());
+        assertEquals(2, result.size());
+        assertEquals("Content 1", result.get(0).getContent());
+        assertEquals("Content 2", result.get(1).getContent());
+
+        verify(postRepository).findAll();
     }
 
     @Test
-    public void testGetPostById_Success() {
-        User user = new User();
-        user.setName("User X");
+    void getPostById_shouldReturnPostDTO_whenFound() {
+        Long postId = 123L;
+        User author = new User();
+        author.setId(UUID.randomUUID());
+        author.setName("Author X");
 
-        Post post = Post.builder().id(1L).content("Post by ID").createdAt(LocalDateTime.now()).author(user).build();
+        Post post = Post.builder().id(postId).content("Some post").createdAt(LocalDateTime.now()).author(author).build();
 
-        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
-        PostDTO result = postService.getPostById(1L);
+        PostDTO result = postService.getPostById(postId);
 
         assertNotNull(result);
-        assertEquals("Post by ID", result.getContent());
-        assertEquals("User X", result.getAuthorName());
+        assertEquals(post.getContent(), result.getContent());
+        assertEquals(author.getId(), result.getAuthorId());
+
+        verify(postRepository).findById(postId);
     }
 
     @Test
-    public void testGetPostById_NotFound() {
-        when(postRepository.findById(42L)).thenReturn(Optional.empty());
+    void getPostById_shouldThrowException_whenNotFound() {
+        Long postId = 404L;
+        when(postRepository.findById(postId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> postService.getPostById(42L));
+        assertThrows(EntityNotFoundException.class, () -> postService.getPostById(postId));
+        verify(postRepository).findById(postId);
     }
 }

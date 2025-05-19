@@ -1,6 +1,5 @@
 package org.main.wiredspaceapi;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,16 +12,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
+
     @Mock
     private UserRepository userRepository;
+
     @Mock
     private PasswordEncoder passwordEncoder;
 
@@ -30,72 +30,128 @@ class UserServiceTest {
     private UserServiceImpl userService;
 
     private User user;
+    private UUID userId;
 
     @BeforeEach
     void setUp() {
-        user = new User("TestUser", "password123", UserRole.STANDARD_USER);
+        user = new User("TestUser", "test@example.com", "encodedPassword", UserRole.STANDARD_USER);
     }
 
     @Test
     void createUser_ShouldReturnSavedUser() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword123");
-        when(userRepository.createUser("TestUser", "encodedPassword123", UserRole.STANDARD_USER))
+        when(userRepository.createUser("TestUser", "test@example.com", "encodedPassword123", UserRole.STANDARD_USER))
                 .thenReturn(user);
 
-        User createdUser = userService.createUser("TestUser", "password123", UserRole.STANDARD_USER);
+        User createdUser = userService.createUser("TestUser", "test@example.com", "password123", UserRole.STANDARD_USER);
 
         assertNotNull(createdUser);
         assertEquals("TestUser", createdUser.getName());
-
-        verify(passwordEncoder, times(1)).encode("password123");
-        verify(userRepository, times(1)).createUser("TestUser", "encodedPassword123", UserRole.STANDARD_USER);
+        verify(passwordEncoder).encode("password123");
+        verify(userRepository).createUser("TestUser", "test@example.com", "encodedPassword123", UserRole.STANDARD_USER);
     }
 
     @Test
-    void getUserById_ShouldReturnUser_WhenUserExists() {
-        when(userRepository.getUserById(1L)).thenReturn(Optional.of(user));
+    void createUser_ShouldThrowException_WhenEmailExists() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        User foundUser = userService.getUserById(1L);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                userService.createUser("TestUser", "test@example.com", "password123", UserRole.STANDARD_USER));
 
-        assertNotNull(foundUser);
-        assertEquals("TestUser", foundUser.getName());
-        verify(userRepository, times(1)).getUserById(1L);
+        assertEquals("Email test@example.com is already in use", exception.getMessage());
+        verify(userRepository, never()).createUser(any(), any(), any(), any());
     }
 
     @Test
-    void getUserById_ShouldThrowEntityNotFoundException_WhenUserNotExists() {
-        when(userRepository.getUserById(1L)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> userService.getUserById(1L));
-        verify(userRepository, times(1)).getUserById(1L);
+    void getUserById_ShouldReturnUser_WhenExists() {
+        when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.getUserById(userId);
+
+        assertTrue(result.isPresent());
+        assertEquals("TestUser", result.get().getName());
+        verify(userRepository).getUserById(userId);
     }
 
     @Test
-    void getAllUsers_ShouldReturnUserList() {
+    void getUserById_ShouldReturnEmpty_WhenNotFound() {
+        when(userRepository.getUserById(userId)).thenReturn(Optional.empty());
+
+        Optional<User> result = userService.getUserById(userId);
+
+        assertTrue(result.isEmpty());
+        verify(userRepository).getUserById(userId);
+    }
+
+    @Test
+    void getAllUsers_ShouldReturnListOfUsers() {
         when(userRepository.getAllUsers()).thenReturn(List.of(user));
 
         List<User> users = userService.getAllUsers();
 
-        assertFalse(users.isEmpty());
         assertEquals(1, users.size());
-        verify(userRepository, times(1)).getAllUsers();
+        assertEquals("TestUser", users.get(0).getName());
+        verify(userRepository).getAllUsers();
     }
 
     @Test
-    void updateUser_ShouldReturnUpdatedUser() {
-        when(userRepository.updateUser(1L, "NewName", "newPass")).thenReturn(Optional.ofNullable(user));
+    void updateUserByEmail_ShouldReturnUpdatedUser() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+        when(userRepository.updateUser(userId, "NewName", "new@example.com", "encodedNewPassword"))
+                .thenReturn(Optional.of(user));
 
-        Optional<User> updatedUser = userService.updateUser(1L, "NewName", "newPass");
+        Optional<User> updatedUser = userService.updateUserByEmail("test@example.com", "NewName", "new@example.com", "newPassword");
 
-        assertNotNull(updatedUser);
-        verify(userRepository, times(1)).updateUser(1L, "NewName", "newPass");
+        assertTrue(updatedUser.isPresent());
+        verify(userRepository).updateUser(userId, "NewName", "new@example.com", "encodedNewPassword");
+    }
+
+    @Test
+    void updateUserByEmail_ShouldReturnEmpty_WhenUserNotFound() {
+        when(userRepository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
+
+        Optional<User> updatedUser = userService.updateUserByEmail("notfound@example.com", "NewName", null, null);
+
+        assertTrue(updatedUser.isEmpty());
+        verify(userRepository, never()).updateUser(any(), any(), any(), any());
+    }
+
+    @Test
+    void deleteUserByEmail_ShouldCallRepository() {
+        doNothing().when(userRepository).deleteUserByEmail("test@example.com");
+
+        userService.deleteUserByEmail("test@example.com");
+
+        verify(userRepository).deleteUserByEmail("test@example.com");
     }
 
     @Test
     void deleteUser_ShouldCallRepository() {
-        doNothing().when(userRepository).deleteUser(1L);
+        doNothing().when(userRepository).deleteUser(userId);
 
-        userService.deleteUser(1L);
+        userService.deleteUser(userId);
 
-        verify(userRepository, times(1)).deleteUser(1L);
+        verify(userRepository).deleteUser(userId);
+    }
+
+    @Test
+    void findByEmail_ShouldReturnUser_WhenFound() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findByEmail("test@example.com");
+
+        assertTrue(result.isPresent());
+        assertEquals("TestUser", result.get().getName());
+    }
+
+    @Test
+    void findByEmail_ShouldReturnEmpty_WhenNotFound() {
+        when(userRepository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
+
+        Optional<User> result = userService.findByEmail("notfound@example.com");
+
+        assertTrue(result.isEmpty());
     }
 }
