@@ -52,9 +52,10 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers().stream()
                 .map(userMapper::userToUserDTO)
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(users);
     }
+
 
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
