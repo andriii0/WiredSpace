@@ -52,10 +52,10 @@ build-sonar:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH == "development"'
 
 deploy:
   stage: deploy
   script:
     - cd WiredSpace-API
-    - compose.yaml
+    - docker compose -f compose.yaml up -d
