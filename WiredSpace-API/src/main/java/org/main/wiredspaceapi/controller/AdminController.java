@@ -21,7 +21,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/promote")
     public ResponseEntity<Admin> promoteUserToAdmin(@RequestBody PromoteUserArgs request) {
         return adminService.promoteUserToAdmin(request.getUserId(), request.getAdminRole())
@@ -29,7 +29,7 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/demote")
     public ResponseEntity<User> demoteAdminToUser(@RequestBody DemoteAdminArgs request) {
         return adminService.demoteAdminToUser(request.getAdminId(), request.getUserRole())
@@ -38,7 +38,7 @@ public class AdminController {
     }
 
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE') or hasAuthority('ROLE_SUPPORT_ROLE')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_SUPPORT')")
     @GetMapping("/user/{id}")
     public ResponseEntity<User> getUserById(@PathVariable UUID id) {
         return adminService.getUserById(id)
@@ -46,7 +46,7 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE') or hasAuthority('ROLE_SUPPORT_ROLE')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_SUPPORT')")
     @GetMapping("/user/email")
     public ResponseEntity<User> getUserByEmail(@RequestParam String email) {
         return adminService.getUserByEmail(email)
@@ -79,7 +79,7 @@ public class AdminController {
 //                .orElse(ResponseEntity.notFound().build());
 //    }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/user/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         boolean deleted = adminService.deleteUser(id);

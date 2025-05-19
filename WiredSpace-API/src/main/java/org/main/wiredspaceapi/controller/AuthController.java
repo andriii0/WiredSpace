@@ -46,6 +46,7 @@ public class AuthController {
                 Map<String, String> response = new HashMap<>();
                 response.put("token", token);
                 response.put("role", u.getRoleAsString());
+                response.put("name", u.getName());
                 return ResponseEntity.ok(response);
             }
 
@@ -56,6 +57,7 @@ public class AuthController {
                 Map<String, String> response = new HashMap<>();
                 response.put("token", token);
                 response.put("role", a.getRoleAsString());
+                response.put("name", a.getName());
                 return ResponseEntity.ok(response);
             }
 
