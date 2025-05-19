@@ -4,7 +4,7 @@ stages:
   - build
   - test
   - build-sonar
-  - qodana
+  - deploy
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false" #so each build is clear and independent
@@ -53,7 +53,9 @@ build-sonar:
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
-#qodana:
-#  stage: qodana
-#  script:
-#    - docker run --rm -v "$($env:CI_PROJECT_DIR)/WiredSpace-API:/data" jetbrains/qodana-jvm qodana --save-report --results-dir=/data/.qodana
+
+deploy:
+  stage: deploy
+  script:
+    - cd WiredSpace-API
+    - docker compose -f compose.yaml up -d
