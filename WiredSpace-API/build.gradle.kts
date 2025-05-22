@@ -32,7 +32,7 @@ sonar {
 		property("sonar.projectName", "WiredSpace")
 		property("sonar.host.url", "http://localhost:9000")
 
-		property("sonar.token", project.findProperty("sonar.token") as String)
+		property("sonar.token", System.getenv("SONAR_TOKEN") ?: "")
 		property("sonar.junit.reportPaths", "build/test-results/test")
 		property("sonar.java.coveragePlugin", "jacoco")
 		property("sonar.jacoco.reportPath", "build/reports/jacoco/test/jacocoTestReport.xml")
