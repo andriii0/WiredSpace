@@ -49,7 +49,6 @@ build-sonar:
     - Write-Host "SONAR_HOST_URL = $env:SONAR_HOST_URL"
     - Write-Host "SONAR_TOKEN = $env:SONAR_TOKEN"
     - Write-Host "TOKEN LENGTH = $($env:SONAR_TOKEN.Length)"
-    - Get-ChildItem Env:
     - ./gradlew.bat "-Dsonar.host.url=$env:SONAR_HOST_URL" "-Dsonar.login=$env:SONAR_TOKEN" sonar
   allow_failure: true
   rules:
