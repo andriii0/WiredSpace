@@ -32,7 +32,9 @@ sonar {
 		property("sonar.projectName", "WiredSpace")
 		property("sonar.host.url", "http://localhost:9000")
 
-		property("sonar.token", System.getenv("SONAR_TOKEN") ?: "")
+		property("sonar.token",
+			(project.findProperty("sonar.token") ?: System.getenv("SONAR_TOKEN"))
+				?: throw GradleException("Sonar token not found in project properties or environment"))
 		property("sonar.junit.reportPaths", "build/test-results/test")
 		property("sonar.java.coveragePlugin", "jacoco")
 		property("sonar.jacoco.reportPath", "build/reports/jacoco/test/jacocoTestReport.xml")
