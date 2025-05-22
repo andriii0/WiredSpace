@@ -16,7 +16,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class AdminServiceImplTest {
+class AdminServiceTest {
 
     private UserRepository userRepository;
     private AdminRepository adminRepository;
