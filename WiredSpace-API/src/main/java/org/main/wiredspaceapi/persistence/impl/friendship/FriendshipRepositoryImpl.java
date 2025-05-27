@@ -41,6 +41,11 @@ public class FriendshipRepositoryImpl implements FriendshipRepository {
     public void delete(UUID id) {
         friendshipDB.deleteById(id);
     }
+    @Override
+    public Optional<Friendship> findById(UUID id) {
+        return friendshipDB.findById(id)
+                .map(mapper::toDomain);
+    }
 
     @Override
     public Optional<Friendship> findByUserAndFriend(UUID userId, UUID friendId) {
