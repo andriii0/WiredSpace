@@ -19,10 +19,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+import static org.main.wiredspaceapi.config.SecurityConstants.SPRING_SECURITY_ROLE_PREFIX;
+
 @Component
 public class AuthenticationRequestFilter extends OncePerRequestFilter {
 
-    private static final String SPRING_SECURITY_ROLE_PREFIX = "ROLE_";
 
     @Autowired
     private TokenDecoder accessTokenDecoder;
@@ -62,16 +63,16 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
             return;
         }
 
-        String normalized = rawRole.startsWith("ROLE_")
+        String normalized = rawRole.startsWith(SPRING_SECURITY_ROLE_PREFIX)
                 ? rawRole
-                : "ROLE_" + rawRole;
+                : SPRING_SECURITY_ROLE_PREFIX + rawRole;
 
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(normalized);
         List<SimpleGrantedAuthority> authorities = List.of(authority);
 
         UserDetails userDetails = org.springframework.security.core.userdetails.User
                 .withUsername(accessToken.getSubject())
-                .password("")
+                .password("") // no password needed here
                 .authorities(authorities)
                 .build();
 
@@ -81,5 +82,6 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
+
 
 }

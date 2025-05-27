@@ -32,7 +32,7 @@ public class AuthController {
     private final AdminService adminService;
 
     @PostMapping
-    public ResponseEntity<?> authenticate(@RequestParam String email,
+    public ResponseEntity<Object> authenticate(@RequestParam String email,
                                           @RequestParam String password) {
         try {
             Authentication authentication = authenticationManager.authenticate(
