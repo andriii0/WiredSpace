@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MessageDB extends JpaRepository<MessageEntity, UUID> {
-    List<MessageEntity> findByFromUserOrToUser(String fromUser, String toUser);
+    List<MessageEntity> findBySenderAndRecipientOrRecipientAndSender(String sender1, String recipient1, String sender2, String recipient2);
 }

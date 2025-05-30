@@ -4,20 +4,15 @@ import org.main.wiredspaceapi.domain.Message;
 import org.main.wiredspaceapi.persistence.entity.MessageEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
 @Mapper(componentModel = "spring")
 public interface MessageEntityMapper {
 
-    @Mappings({
-            @Mapping(source = "from", target = "fromUser"),
-            @Mapping(source = "to", target = "toUser")
-    })
+    @Mapping(source = "fromUser", target = "sender")
+    @Mapping(source = "toUser", target = "recipient")
     MessageEntity toEntity(Message message);
 
-    @Mappings({
-            @Mapping(source = "fromUser", target = "from"),
-            @Mapping(source = "toUser", target = "to")
-    })
+    @Mapping(source = "sender", target = "fromUser")
+    @Mapping(source = "recipient", target = "toUser")
     Message toDomain(MessageEntity entity);
 }
