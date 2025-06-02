@@ -28,13 +28,13 @@ public interface CommentEntityMapper {
 
     List<Comment> toDomainList(List<PostCommentEntity> entities);
 
-//    default PostEntity toPostEntity(Long id) {
-//        if (id == null) return null;
-//        return PostEntity.builder().id(id).build();
-//    }
-//
-//    default UserEntity toUserEntity(UUID id) {
-//        if (id == null) return null;
-//        return UserEntity.builder().id(id).build();
-//    }
+    default PostEntity toPostEntity(Long id) {
+        if (id == null) return null;
+        return PostEntity.builder().id(id).build();
+    }
+
+    default UserEntity toUserEntity(UUID id) {
+        if (id == null) return null;
+        return UserEntity.builder().id(id).build();
+    }
 }

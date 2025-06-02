@@ -1,11 +1,14 @@
 package org.main.wiredspaceapi.persistence.entity;
 
 import jakarta.persistence.*;
+import jdk.jshell.Snippet;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import java.util.HashSet;
 import java.util.Set;
 
+@SuperBuilder
 @Entity
 @DiscriminatorValue("USER")
 @Getter

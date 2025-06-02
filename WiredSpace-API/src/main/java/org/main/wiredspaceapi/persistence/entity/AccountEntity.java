@@ -2,8 +2,11 @@ package org.main.wiredspaceapi.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.util.UUID;
 
+@SuperBuilder
 @Entity
 @Table(name = "accounts")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
