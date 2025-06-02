@@ -2,19 +2,17 @@ package org.main.wiredspaceapi.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import org.main.wiredspaceapi.persistence.entity.PostCommentEntity;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "post_comments")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostEntity {
+public class PostCommentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,12 +23,10 @@ public class PostEntity {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private PostEntity post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity author;
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PostLikeEntity> likes = new HashSet<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PostCommentEntity> comments = new HashSet<>();
 }
