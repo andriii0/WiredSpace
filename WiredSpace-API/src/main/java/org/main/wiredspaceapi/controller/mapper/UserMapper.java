@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.controller.converter;
+package org.main.wiredspaceapi.controller.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

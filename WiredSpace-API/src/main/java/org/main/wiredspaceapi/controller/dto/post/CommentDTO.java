@@ -1,17 +1,14 @@
 package org.main.wiredspaceapi.controller.dto.post;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Data
-public class PostDTO {
+public class CommentDTO {
     private Long id;
+    private UUID authorId;
     private String content;
     private LocalDateTime createdAt;
-    private UUID authorId;
-
-    private List<UUID> likedByUserIds;
-    private List<CommentDTO> comments;
 }

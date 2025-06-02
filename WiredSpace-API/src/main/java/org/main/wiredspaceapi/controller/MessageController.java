@@ -3,7 +3,7 @@ package org.main.wiredspaceapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.MessageService;
 import org.main.wiredspaceapi.business.UserService;
-import org.main.wiredspaceapi.controller.converter.MessageMapper;
+import org.main.wiredspaceapi.controller.mapper.MessageMapper;
 import org.main.wiredspaceapi.controller.dto.message.MessageDTO;
 import org.main.wiredspaceapi.domain.Message;
 import org.springframework.http.HttpStatus;

@@ -5,7 +5,7 @@ import org.main.wiredspaceapi.business.FriendshipService;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipRequestDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipResponseDTO;
 import org.main.wiredspaceapi.domain.Friendship;
-import org.main.wiredspaceapi.controller.converter.FriendshipMapper;
+import org.main.wiredspaceapi.controller.mapper.FriendshipMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;

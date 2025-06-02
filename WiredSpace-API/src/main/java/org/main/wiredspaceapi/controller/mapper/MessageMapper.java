@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.controller.converter;
+package org.main.wiredspaceapi.controller.mapper;
 
 import org.main.wiredspaceapi.controller.dto.message.MessageDTO;
 import org.main.wiredspaceapi.domain.Message;

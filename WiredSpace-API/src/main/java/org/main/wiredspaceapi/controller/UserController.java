@@ -1,10 +1,9 @@
 package org.main.wiredspaceapi.controller;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
-import org.main.wiredspaceapi.controller.converter.UserMapper;
+import org.main.wiredspaceapi.controller.mapper.UserMapper;
 import org.main.wiredspaceapi.controller.dto.user.UserCreateDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserUpdateDTO;
@@ -12,14 +11,11 @@ import org.main.wiredspaceapi.domain.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 @RestController

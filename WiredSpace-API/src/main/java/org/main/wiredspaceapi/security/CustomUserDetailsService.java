@@ -1,10 +1,8 @@
-package org.main.wiredspaceapi.business.impl;
+package org.main.wiredspaceapi.security;
 
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.AdminService;
 import org.main.wiredspaceapi.business.UserService;
-import org.main.wiredspaceapi.domain.Admin;
-import org.main.wiredspaceapi.domain.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

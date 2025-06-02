@@ -1,20 +1,18 @@
 package org.main.wiredspaceapi.domain;
 
 import lombok.*;
+
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Post {
+public class Comment {
     private Long id;
+    private UUID authorId;
     private String content;
     private LocalDateTime createdAt;
-    private User author;
-
-    private List<User> likedBy;
-    private List<Comment> comments;
 }
