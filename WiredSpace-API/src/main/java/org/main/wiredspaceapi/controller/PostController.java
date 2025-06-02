@@ -66,4 +66,31 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
+    //like part
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likePost(
+            @PathVariable Long id,
+            @RequestParam UUID userId
+    ) {
+        postService.likePost(id, userId.toString());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Void> unlikePost(
+            @PathVariable Long id,
+            @RequestParam UUID userId
+    ) {
+        postService.unlikePost(id, userId.toString());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/likes")
+    public ResponseEntity<List<String>> getUsersWhoLikedPost(
+            @PathVariable Long id
+    ) {
+        List<String> userIds = postService.getUsersWhoLikedPost(id);
+        return ResponseEntity.ok(userIds);
+    }
 }

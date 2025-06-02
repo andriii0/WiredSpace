@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -34,14 +35,14 @@ public class PostServiceImpl implements PostService {
 
         post = postRepository.create(post);
 
-        return postConverter.postToPostDto(post);
+        return enrichWithLikes(postConverter.postToPostDto(post), post.getId());
     }
 
     @Override
     public List<PostDTO> getAllPosts() {
         return postRepository.getAll()
                 .stream()
-                .map(postConverter::postToPostDto)
+                .map(post -> enrichWithLikes(postConverter.postToPostDto(post), post.getId()))
                 .toList();
     }
 
@@ -49,8 +50,7 @@ public class PostServiceImpl implements PostService {
     public PostDTO getPostById(Long id) {
         Post post = postRepository.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
-
-        return postConverter.postToPostDto(post);
+        return enrichWithLikes(postConverter.postToPostDto(post), id);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class PostServiceImpl implements PostService {
         existingPost.setCreatedAt(LocalDateTime.now());
 
         Post updatedPost = postRepository.update(existingPost);
-        return postConverter.postToPostDto(updatedPost);
+        return enrichWithLikes(postConverter.postToPostDto(updatedPost), id);
     }
 
     @Override
@@ -71,5 +71,45 @@ public class PostServiceImpl implements PostService {
             throw new EntityNotFoundException("Post not found with id: " + id);
         }
         postRepository.deleteById(id);
+    }
+
+
+    @Override
+    public void likePost(Long postId, String userId) {
+        UUID uuid = UUID.fromString(userId);
+        checkPostAndUserExist(postId, uuid);
+        postRepository.likePost(postId, uuid);
+    }
+
+    @Override
+    public void unlikePost(Long postId, String userId) {
+        UUID uuid = UUID.fromString(userId);
+        checkPostAndUserExist(postId, uuid);
+        postRepository.unlikePost(postId, uuid);
+    }
+
+    @Override
+    public List<String> getUsersWhoLikedPost(Long postId) {
+        if (!postRepository.existsById(postId)) {
+            throw new EntityNotFoundException("Post not found with id: " + postId);
+        }
+        return postRepository.getUsersWhoLikedPost(postId)
+                .stream()
+                .map(UUID::toString)
+                .toList();
+    }
+
+    private void checkPostAndUserExist(Long postId, UUID userId) {
+        if (!postRepository.existsById(postId)) {
+            throw new EntityNotFoundException("Post not found with id: " + postId);
+        }
+        if (userRepository.getUserById(userId).isEmpty()) {
+            throw new EntityNotFoundException("User not found with id: " + userId);
+        }
+    }
+
+    private PostDTO enrichWithLikes(PostDTO dto, Long postId) {
+        dto.setLikedByUserIds(postRepository.getUsersWhoLikedPost(postId));
+        return dto;
     }
 }

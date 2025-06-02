@@ -3,18 +3,27 @@ package org.main.wiredspaceapi.persistence.impl.post;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.domain.Post;
 import org.main.wiredspaceapi.persistence.PostRepository;
+import org.main.wiredspaceapi.persistence.entity.CompositeKey.PostLikeId;
+import org.main.wiredspaceapi.persistence.entity.PostEntity;
+import org.main.wiredspaceapi.persistence.entity.PostLikeEntity;
+import org.main.wiredspaceapi.persistence.entity.UserEntity;
+import org.main.wiredspaceapi.persistence.impl.user.UserDB;
 import org.main.wiredspaceapi.persistence.mapper.PostEntityMapper;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostRepository {
 
-    private final PostDB postDB;
     private final PostEntityMapper postEntityMapper;
+    private final PostLikeDB postLikeDB;
+    private final PostDB postDB;
+    private final UserDB userDB;
 
     @Override
     public Post create(Post post) {
@@ -48,5 +57,41 @@ public class PostRepositoryImpl implements PostRepository {
     @Override
     public boolean existsById(Long id) {
         return postDB.existsById(id);
+    }
+
+    @Override
+    public void likePost(Long postId, UUID userId) {
+        PostLikeId likeId = new PostLikeId(postId, userId);
+        if (postLikeDB.existsById(likeId)) return;
+
+        PostEntity post = postDB.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        UserEntity user = userDB.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        PostLikeEntity like = PostLikeEntity.builder()
+                .id(likeId)
+                .post(post)
+                .user(user)
+                .likedAt(LocalDateTime.now())
+                .build();
+
+        postLikeDB.save(like);
+    }
+    @Override
+    public void unlikePost(Long postId, UUID userId) {
+        PostLikeId likeId = new PostLikeId(postId, userId);
+        if (postLikeDB.existsById(likeId)) {
+            postLikeDB.deleteById(likeId);
+        }
+    }
+
+    @Override
+    public List<UUID> getUsersWhoLikedPost(Long postId) {
+        return postLikeDB.findAllByPostId(postId)
+                .stream()
+                .map(like -> like.getUser().getId())
+                .toList();
     }
 }
