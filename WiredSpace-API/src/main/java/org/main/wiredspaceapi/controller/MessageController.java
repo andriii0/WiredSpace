@@ -26,7 +26,7 @@ public class MessageController {
     private final MessageMapper messageMapper;
 
     @PostMapping("/private")
-    public ResponseEntity<Void> sendPrivateMessage(@RequestBody MessageDTO messageDTO, Principal principal) {
+    public ResponseEntity<MessageDTO> sendPrivateMessage(@RequestBody MessageDTO messageDTO, Principal principal) {
         if (principal == null || principal.getName() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -38,15 +38,11 @@ public class MessageController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Message message = messageMapper.toDomain(messageDTO);
-        message.setFromUser(sender);
-        message.setTimestamp(java.time.LocalDateTime.now());
-
-        messageService.saveMessage(message);
-
-        messagingTemplate.convertAndSendToUser(recipient, "/queue/messages", messageMapper.toDTO(message));
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        MessageDTO sent = messageService.sendPrivateMessage(sender, messageDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(sent);
     }
+
+
 
     @GetMapping("/conversation/{userEmail}")
     public ResponseEntity<List<MessageDTO>> getMessagesBetween(@PathVariable String userEmail, Principal principal) {

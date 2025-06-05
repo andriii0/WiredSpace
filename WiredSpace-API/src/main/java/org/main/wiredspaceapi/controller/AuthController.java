@@ -33,9 +33,9 @@ public class AuthController {
 
     @PostMapping
     public ResponseEntity<Object> authenticate(@RequestParam String email,
-                                          @RequestParam String password) {
+                                               @RequestParam String password) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
 
@@ -43,22 +43,14 @@ public class AuthController {
             if (userOpt.isPresent()) {
                 User u = userOpt.get();
                 String token = createJwt(u.getEmail(), u.getId(), u.getRoleAsString());
-                Map<String, String> response = new HashMap<>();
-                response.put("token", token);
-                response.put("role", u.getRoleAsString());
-                response.put("name", u.getName());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(token);
             }
 
             Optional<Admin> adminOpt = adminService.findAdminByEmail(email);
             if (adminOpt.isPresent()) {
                 Admin a = adminOpt.get();
                 String token = createJwt(a.getEmail(), a.getId(), a.getRoleAsString());
-                Map<String, String> response = new HashMap<>();
-                response.put("token", token);
-                response.put("role", a.getRoleAsString());
-                response.put("name", a.getName());
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(token);
             }
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -69,6 +61,7 @@ public class AuthController {
                     .body("Invalid email or password");
         }
     }
+
 
 
     private String createJwt(String subject, UUID accountId, String role) {

@@ -26,7 +26,7 @@ public class MessageRepositoryImpl implements MessageRepository {
     @Override
     public List<Message> getMessagesBetween(String user1, String user2) {
         return messageDB
-                .findBySenderAndRecipientOrRecipientAndSender(user1, user2, user2, user1)
+                .findConversation(user1, user2)
                 .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
