@@ -6,6 +6,7 @@ import org.main.wiredspaceapi.controller.dto.friendship.FriendshipRequestDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipResponseDTO;
 import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.controller.mapper.FriendshipMapper;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -23,13 +24,14 @@ public class FriendshipController {
 
     private final FriendshipService friendshipService;
     private final FriendshipMapper friendshipMapper;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     @PostMapping
     public ResponseEntity<FriendshipResponseDTO> sendFriendRequest(
             @RequestBody FriendshipRequestDTO request,
             Authentication authentication
     ) {
-        UUID currentUserId = UUID.fromString(authentication.getName());
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
         Friendship friendship = friendshipService.sendFriendRequest(currentUserId, request.getFriendId());
         return ResponseEntity.ok(friendshipMapper.toDTO(friendship));
     }
