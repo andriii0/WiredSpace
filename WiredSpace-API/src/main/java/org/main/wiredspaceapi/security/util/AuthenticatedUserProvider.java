@@ -31,4 +31,10 @@ public class AuthenticatedUserProvider {
             throw new SecurityException("Access denied: not your account.");
         }
     }
+    public void validateCurrentUserAccess(UUID targetId) {
+        UUID currentId = getCurrentUserId();
+        if (!currentId.equals(targetId)) {
+            throw new SecurityException("Access denied: not your account.");
+        }
+    }
 }

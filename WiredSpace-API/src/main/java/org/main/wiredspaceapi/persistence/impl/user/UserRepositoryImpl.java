@@ -60,13 +60,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void deleteUser(UUID id) {
-        userDB.deleteById(id);
+        userDB.findById(id).ifPresent(user -> {
+            userDB.delete(user);
+        });
     }
 
-    @Override
-    public void deleteUserByEmail(String email) {
-        userDB.deleteUserByEmail(email);
-    }
 
     @Override
     public List<User> searchUsers(String query, int offset, int limit) {

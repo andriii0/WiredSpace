@@ -21,6 +21,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticatedUserProvider userProvider;
+    private final MessageServiceImpl messageService;
 
     @Override
     public User createUser(String name, String email, String password, UserRole userRole) {
@@ -66,13 +67,20 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(UUID id) {
+        userProvider.validateCurrentUserAccess(id);
         userRepository.deleteUser(id);
     }
 
     @Override
     public void deleteUserByEmail(String targetEmail) {
-        userRepository.deleteUserByEmail(targetEmail);
+        Optional<User> user = findByEmail(targetEmail);
+        if (user.isPresent()) {
+            userProvider.validateCurrentUserAccess(targetEmail);
+            messageService.deleteAllMessagesForUser(user.get());
+            userRepository.deleteUser(user.get().getId());
+        }
     }
+
 
     @Override
     public List<User> searchUsers(String query, int offset, int limit) {

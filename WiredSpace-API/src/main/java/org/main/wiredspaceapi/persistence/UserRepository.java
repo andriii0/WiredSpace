@@ -14,7 +14,6 @@ public interface UserRepository {
     Optional<User> findByEmail(String email);
     Optional<User> updateUser(UUID id, String name, String email, String password);
     void deleteUser(UUID id);
-    void deleteUserByEmail(String email);
 
     //pagination
     List<User> searchUsers(String query, int offset, int limit);

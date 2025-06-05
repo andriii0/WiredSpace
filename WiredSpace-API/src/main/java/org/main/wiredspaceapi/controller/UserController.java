@@ -1,6 +1,7 @@
 package org.main.wiredspaceapi.controller;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.controller.dto.user.PagedUserResponse;
