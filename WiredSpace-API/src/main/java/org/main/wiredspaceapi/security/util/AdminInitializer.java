@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.config;
+package org.main.wiredspaceapi.security.util;
 
 import org.main.wiredspaceapi.domain.enums.AdminRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;

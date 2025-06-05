@@ -3,11 +3,13 @@ package org.main.wiredspaceapi.controller;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
+import org.main.wiredspaceapi.controller.dto.user.PagedUserResponse;
 import org.main.wiredspaceapi.controller.mapper.UserMapper;
 import org.main.wiredspaceapi.controller.dto.user.UserCreateDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserUpdateDTO;
 import org.main.wiredspaceapi.domain.User;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -25,9 +27,10 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO userCreateDTO) {
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateDTO userCreateDTO) {
         User user = userService.createUser(
                 userCreateDTO.getName(),
                 userCreateDTO.getEmail(),
@@ -52,61 +55,45 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> updateCurrentUser(
-            @RequestBody UserUpdateDTO dto,
-            Authentication authentication
+            @Valid @RequestBody UserUpdateDTO dto
     ) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
-        }
-
-        String email = authentication.getName();
-
-        Optional<User> updated = userService.updateUserByEmail(
-                email,
+        Optional<User> updated = userService.updateUserById(
+                authenticatedUserProvider.getCurrentUserId(),
                 dto.getName(),
                 dto.getEmail(),
                 dto.getPassword()
         );
+
 
         return updated
                 .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
-
-
-//    @PutMapping("/{id}")
-//    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserCreateDTO userCreateDTO) {
-//        return userService.updateUser(
-//                        id,
-//                        userCreateDTO.getName(),
-//                        userCreateDTO.getEmail(),
-//                        userCreateDTO.getPassword(),
-//                        userCreateDTO.getRole()
-//                )
-//                .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-
-    @Transactional
     @DeleteMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> deleteCurrentUser(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
-        }
-
-        String email = authentication.getName();
-        System.out.println("Deleting user: " + email);
-
-        userService.deleteUserByEmail(email);
-
+    @Transactional
+    public ResponseEntity<Void> deleteCurrentUser() {
+        userService.deleteUserByEmail(authenticatedUserProvider.getCurrentUserEmail());
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<PagedUserResponse> searchUsers(
+            @RequestParam(required = false, defaultValue = "") String query,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        List<UserDTO> users = userService.searchUsers(query, offset, limit)
+                .stream()
+                .map(userMapper::userToUserDTO)
+                .toList();
+
+        long total = userService.countSearchUsers(query);
+
+        return ResponseEntity.ok(new PagedUserResponse(users, total));
+    }
 }

@@ -7,7 +7,8 @@ import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.persistence.entity.UserEntity;
 import org.main.wiredspaceapi.persistence.mapper.UserEntityMapper;
 import org.springframework.stereotype.Repository;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,5 +66,19 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void deleteUserByEmail(String email) {
         userDB.deleteUserByEmail(email);
+    }
+
+    @Override
+    public List<User> searchUsers(String query, int offset, int limit) {
+        Pageable pageable = PageRequest.of(offset / limit, limit); // page = offset / limit
+        List<UserEntity> entities = userDB.searchByNameOrEmail(query, pageable);
+        return entities.stream()
+                .map(accountMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countSearchUsers(String query) {
+        return userDB.countByNameOrEmail(query);
     }
 }

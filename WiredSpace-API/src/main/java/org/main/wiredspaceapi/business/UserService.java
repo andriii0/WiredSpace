@@ -12,6 +12,10 @@ public interface UserService {
     Optional<User>  getUserById(UUID id);
     Optional<User> findByEmail(String email);
     List<User> getAllUsers();
-    Optional<User> updateUserByEmail(String currentEmail, String newName, String newEmail, String newPassword);
+    Optional<User> updateUserById(UUID userId, String newName, String newEmail, String newPassword);
     void deleteUserByEmail(String email); //TODO boolean not void
+
+    List<User> searchUsers(String query, int offset, int limit);
+    long countSearchUsers(String query);
+
 }

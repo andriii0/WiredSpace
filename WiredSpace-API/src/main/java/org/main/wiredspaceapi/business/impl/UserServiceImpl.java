@@ -6,6 +6,7 @@ import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticatedUserProvider userProvider;
 
     @Override
     public User createUser(String name, String email, String password, UserRole userRole) {
@@ -49,27 +51,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> updateUserByEmail(String currentEmail, String newName, String newEmail, String newPassword) {
-        Optional<User> userOptional = userRepository.findByEmail(currentEmail);
+    public Optional<User> updateUserById(UUID userId, String newName, String newEmail, String newPassword) {
+        Optional<User> userOptional = userRepository.getUserById(userId);
         if (userOptional.isEmpty()) return Optional.empty();
 
         User user = userOptional.get();
 
         String nameToSet = (newName != null && !newName.trim().isEmpty()) ? newName : user.getName();
         String emailToSet = (newEmail != null && !newEmail.trim().isEmpty()) ? newEmail : user.getEmail();
-        String passwordToSet = (newPassword != null && !newPassword.trim().isEmpty()) ?
-                passwordEncoder.encode(newPassword) : user.getPassword();
+        String passwordToSet = (newPassword != null && !newPassword.trim().isEmpty())
+                ? passwordEncoder.encode(newPassword) : user.getPassword();
 
         return userRepository.updateUser(user.getId(), nameToSet, emailToSet, passwordToSet);
     }
-
 
     public void deleteUser(UUID id) {
         userRepository.deleteUser(id);
     }
 
     @Override
-    public void deleteUserByEmail(String email) {
-        userRepository.deleteUserByEmail(email);
+    public void deleteUserByEmail(String targetEmail) {
+        userRepository.deleteUserByEmail(targetEmail);
+    }
+
+    @Override
+    public List<User> searchUsers(String query, int offset, int limit) {
+        return userRepository.searchUsers(query, offset, limit);
+    }
+
+    @Override
+    public long countSearchUsers(String query) {
+        return userRepository.countSearchUsers(query);
     }
 }

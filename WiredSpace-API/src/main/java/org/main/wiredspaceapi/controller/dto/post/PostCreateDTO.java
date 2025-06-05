@@ -7,5 +7,4 @@ import java.util.UUID;
 @Data
 public class PostCreateDTO {
     private String content;
-    private UUID authorId;
 }

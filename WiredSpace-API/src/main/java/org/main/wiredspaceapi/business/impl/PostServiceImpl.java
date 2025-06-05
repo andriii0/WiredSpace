@@ -12,6 +12,8 @@ import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.persistence.CommentRepository;
 import org.main.wiredspaceapi.persistence.PostRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,11 +27,13 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostMapper postConverter;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     @Override
     public PostDTO createPost(PostCreateDTO dto) {
-        User author = userRepository.getUserById(dto.getAuthorId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + dto.getAuthorId()));
+        UUID userId = authenticatedUserProvider.getCurrentUserId();
+        User author = userRepository.getUserById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
 
         Post post = postConverter.postCreateDtoToPost(dto);
         post.setCreatedAt(LocalDateTime.now());
@@ -60,6 +64,11 @@ public class PostServiceImpl implements PostService {
         Post existingPost = postRepository.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
 
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
+        if (!existingPost.getAuthor().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("You are not the owner of this post");
+        }
+
         existingPost.setContent(dto.getContent());
         existingPost.setCreatedAt(LocalDateTime.now());
 
@@ -67,13 +76,21 @@ public class PostServiceImpl implements PostService {
         return enrichWithLikes(postConverter.postToPostDto(updatedPost), id);
     }
 
+
     @Override
     public void deletePost(Long id) {
-        if (!postRepository.existsById(id)) {
-            throw new EntityNotFoundException("Post not found with id: " + id);
+        Post post = postRepository.getById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
+
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
+
+        if (!post.getAuthor().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("You are not allowed to delete this post");
         }
-        postRepository.deleteById(id);
+
+        postRepository.deleteById(post.getId());
     }
+
 
 
     @Override
