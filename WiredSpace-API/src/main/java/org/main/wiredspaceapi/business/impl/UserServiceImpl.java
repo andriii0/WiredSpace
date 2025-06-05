@@ -76,7 +76,6 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = findByEmail(targetEmail);
         if (user.isPresent()) {
             userProvider.validateCurrentUserAccess(targetEmail);
-            messageService.deleteAllMessagesForUser(user.get());
             userRepository.deleteUser(user.get().getId());
         }
     }
