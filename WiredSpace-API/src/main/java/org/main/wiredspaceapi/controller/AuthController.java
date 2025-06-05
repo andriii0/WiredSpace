@@ -43,14 +43,24 @@ public class AuthController {
             if (userOpt.isPresent()) {
                 User u = userOpt.get();
                 String token = createJwt(u.getEmail(), u.getId(), u.getRoleAsString());
-                return ResponseEntity.ok(token);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("name", u.getName());
+
+                return ResponseEntity.ok(response);
             }
 
             Optional<Admin> adminOpt = adminService.findAdminByEmail(email);
             if (adminOpt.isPresent()) {
                 Admin a = adminOpt.get();
                 String token = createJwt(a.getEmail(), a.getId(), a.getRoleAsString());
-                return ResponseEntity.ok(token);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("name", a.getName());
+
+                return ResponseEntity.ok(response);
             }
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
