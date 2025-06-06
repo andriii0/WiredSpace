@@ -10,6 +10,7 @@ import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -28,6 +29,12 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         if (userId.equals(friendId)) {
             throw new IllegalArgumentException("You cannot send a friend request to yourself.");
+        }
+
+        Optional<Friendship> friendshipOptional = friendshipRepository.findByUserAndFriend(userId, friendId);
+
+        if (friendshipOptional.isPresent()) {
+            throw new IllegalArgumentException("You cannot send a friend request to your friend.");
         }
 
         Friendship friendship = new Friendship(null, userId, friendId, false); //is not accepted by default
@@ -99,4 +106,27 @@ public class FriendshipServiceImpl implements FriendshipService {
         return friendshipRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Friendship with ID " + id + " not found"));
     }
+
+    @Override
+    public String getFriendshipStatus(UUID friendId) {
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
+        Optional<Friendship> friendshipOptional = friendshipRepository.findByUserAndFriend(currentUserId, friendId);
+
+        if (friendshipOptional.isEmpty()) {
+            return "none";
+        }
+
+        Friendship friendship = friendshipOptional.get();
+
+        if (friendship.isAccepted()) {
+            return "accepted";
+        } else {
+            if (friendship.getUserId().equals(currentUserId)) {
+                return "sent";
+            } else {
+                return "received";
+            }
+        }
+    }
+
 }

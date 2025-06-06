@@ -6,6 +6,7 @@ import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.business.impl.UserServiceImpl;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipRequestDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipResponseDTO;
+import org.main.wiredspaceapi.controller.dto.friendship.FriendshipStatusResponseDTO;
 import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.controller.mapper.FriendshipMapper;
 import org.main.wiredspaceapi.domain.User;
@@ -78,4 +79,21 @@ public class FriendshipController {
         Friendship updated = friendshipService.updateFriendship(id, request.isAccepted());
         return ResponseEntity.ok(friendshipMapper.toDTO(updated));
     }
+
+    @GetMapping("/status")
+    public ResponseEntity<FriendshipStatusResponseDTO> getFriendshipStatus(
+            @RequestParam UUID friendId) {
+
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
+        String status = friendshipService.getFriendshipStatus(friendId);
+
+        FriendshipStatusResponseDTO response = FriendshipStatusResponseDTO.builder()
+                .status(status)
+                .userId(currentUserId)
+                .friendId(friendId)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 }
