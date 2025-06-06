@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.controller.dto.friendship;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FriendshipResponseDTO {
     private UUID id;
-    private UUID userId;
-    private UUID friendId;
+    private UserDTO user;
+    private UserDTO friend;
     private boolean accepted;
 }

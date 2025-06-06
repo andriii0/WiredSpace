@@ -6,6 +6,7 @@ import org.main.wiredspaceapi.business.FriendshipService;
 import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.persistence.FriendshipRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     @Override
     public Friendship sendFriendRequest(UUID userId, UUID friendId) {
@@ -56,15 +58,20 @@ public class FriendshipServiceImpl implements FriendshipService {
     @Override
     public void deleteFriendship(UUID friendshipId) {
         Friendship friendship = findFriendshipOrThrow(friendshipId);
-        friendshipRepository.delete(friendshipId);
-        log.info("Deleted friendship between {} and {}", friendship.getUserId(), friendship.getFriendId());
+        UUID currentId = authenticatedUserProvider.getCurrentUserId();
+        if (friendship.getUserId().equals(currentId) || friendship.getFriendId().equals(currentId)) {
+            friendshipRepository.delete(friendshipId);
+            log.info("Deleted friendship between {} and {}", friendship.getUserId(), friendship.getFriendId());
+        } else {
+            throw new IllegalArgumentException("You cannot delete a friendship.");
+        }
+
     }
 
     @Override
     public List<Friendship> getFriendsOfUser(UUID userId) {
         validateUserExistence(userId);
         return friendshipRepository.findAllByUser(userId).stream()
-                .filter(Friendship::isAccepted) //shows only accepted friends
                 .toList();
     }
 

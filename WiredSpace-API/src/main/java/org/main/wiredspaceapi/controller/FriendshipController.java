@@ -2,10 +2,13 @@ package org.main.wiredspaceapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.FriendshipService;
+import org.main.wiredspaceapi.business.UserService;
+import org.main.wiredspaceapi.business.impl.UserServiceImpl;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipRequestDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipResponseDTO;
 import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.controller.mapper.FriendshipMapper;
+import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +28,7 @@ public class FriendshipController {
     private final FriendshipService friendshipService;
     private final FriendshipMapper friendshipMapper;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final UserService userService;
 
     @PostMapping
     public ResponseEntity<FriendshipResponseDTO> sendFriendRequest(
@@ -44,18 +48,26 @@ public class FriendshipController {
 
     @GetMapping("/me")
     public ResponseEntity<List<FriendshipResponseDTO>> getMyFriendships(Authentication authentication) {
-        UUID currentUserId = UUID.fromString(authentication.getName());
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
         List<Friendship> friendships = friendshipService.getFriendsOfUser(currentUserId);
+
         List<FriendshipResponseDTO> response = friendships.stream()
-                .map(friendshipMapper::toDTO)
+                .map(friendship -> {
+                    User user = userService.getUserById(friendship.getUserId())
+                            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                    User friend = userService.getUserById(friendship.getFriendId())
+                            .orElseThrow(() -> new IllegalArgumentException("Friend not found"));
+                    return friendshipMapper.toDTO(friendship, user, friend);
+                })
                 .toList();
+
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFriendship(@PathVariable UUID id) {
         friendshipService.deleteFriendship(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
