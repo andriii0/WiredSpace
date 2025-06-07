@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MessageDB extends JpaRepository<MessageEntity, UUID> {
+    //sender and recipient = emails not user entity
     @Query("SELECT m FROM MessageEntity m WHERE " +
             "(LOWER(m.sender) = LOWER(:user1) AND LOWER(m.recipient) = LOWER(:user2)) " +
             "OR (LOWER(m.sender) = LOWER(:user2) AND LOWER(m.recipient) = LOWER(:user1))")
