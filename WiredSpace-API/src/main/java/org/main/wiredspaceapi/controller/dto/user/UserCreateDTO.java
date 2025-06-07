@@ -3,10 +3,14 @@ package org.main.wiredspaceapi.controller.dto.user;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserCreateDTO {
 
     @NotBlank(message = "Name is required")

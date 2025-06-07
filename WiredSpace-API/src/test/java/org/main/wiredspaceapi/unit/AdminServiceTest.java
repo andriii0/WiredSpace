@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi;
+package org.main.wiredspaceapi.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

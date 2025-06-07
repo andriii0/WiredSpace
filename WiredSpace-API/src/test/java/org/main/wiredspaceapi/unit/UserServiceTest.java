@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi;
+package org.main.wiredspaceapi.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,6 +7,7 @@ import org.main.wiredspaceapi.business.impl.UserServiceImpl;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +27,9 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private AuthenticatedUserProvider userProvider;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -34,7 +38,9 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
+        userId = UUID.randomUUID();
         user = new User("TestUser", "test@example.com", "encodedPassword", UserRole.STANDARD_USER);
+        user.setId(userId);
     }
 
     @Test
@@ -96,43 +102,38 @@ class UserServiceTest {
     }
 
     @Test
-    void updateUserByEmail_ShouldReturnUpdatedUser() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+    void updateUserById_ShouldReturnUpdatedUser() {
+        when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
         when(userRepository.updateUser(userId, "NewName", "new@example.com", "encodedNewPassword"))
                 .thenReturn(Optional.of(user));
 
-        Optional<User> updatedUser = userService.updateUserByEmail("test@example.com", "NewName", "new@example.com", "newPassword");
+        Optional<User> updatedUser = userService.updateUserById(userId, "NewName", "new@example.com", "newPassword");
 
         assertTrue(updatedUser.isPresent());
         verify(userRepository).updateUser(userId, "NewName", "new@example.com", "encodedNewPassword");
     }
 
     @Test
-    void updateUserByEmail_ShouldReturnEmpty_WhenUserNotFound() {
-        when(userRepository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
-
-        Optional<User> updatedUser = userService.updateUserByEmail("notfound@example.com", "NewName", null, null);
-
-        assertTrue(updatedUser.isEmpty());
-        verify(userRepository, never()).updateUser(any(), any(), any(), any());
-    }
-
-    @Test
     void deleteUserByEmail_ShouldCallRepository() {
-        doNothing().when(userRepository).deleteUserByEmail("test@example.com");
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        doNothing().when(userProvider).validateCurrentUserAccess("test@example.com");
+        doNothing().when(userRepository).deleteUser(userId);
 
         userService.deleteUserByEmail("test@example.com");
 
-        verify(userRepository).deleteUserByEmail("test@example.com");
+        verify(userProvider).validateCurrentUserAccess("test@example.com");
+        verify(userRepository).deleteUser(userId);
     }
 
     @Test
     void deleteUser_ShouldCallRepository() {
+        doNothing().when(userProvider).validateCurrentUserAccess(userId);
         doNothing().when(userRepository).deleteUser(userId);
 
         userService.deleteUser(userId);
 
+        verify(userProvider).validateCurrentUserAccess(userId);
         verify(userRepository).deleteUser(userId);
     }
 
@@ -153,5 +154,31 @@ class UserServiceTest {
         Optional<User> result = userService.findByEmail("notfound@example.com");
 
         assertTrue(result.isEmpty());
+    }
+    @Test
+    void searchUsers_ShouldReturnMatchingUsers() {
+        String query = "test";
+        int offset = 0;
+        int limit = 10;
+
+        when(userRepository.searchUsers(query, offset, limit)).thenReturn(List.of(user));
+
+        List<User> result = userService.searchUsers(query, offset, limit);
+
+        assertEquals(1, result.size());
+        assertEquals("TestUser", result.get(0).getName());
+        verify(userRepository).searchUsers(query, offset, limit);
+    }
+
+    @Test
+    void countSearchUsers_ShouldReturnCorrectCount() {
+        String query = "test";
+
+        when(userRepository.countSearchUsers(query)).thenReturn(3L);
+
+        long count = userService.countSearchUsers(query);
+
+        assertEquals(3L, count);
+        verify(userRepository).countSearchUsers(query);
     }
 }
