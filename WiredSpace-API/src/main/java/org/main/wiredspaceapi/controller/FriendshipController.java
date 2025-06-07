@@ -3,7 +3,6 @@ package org.main.wiredspaceapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.FriendshipService;
 import org.main.wiredspaceapi.business.UserService;
-import org.main.wiredspaceapi.business.impl.UserServiceImpl;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipRequestDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipResponseDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipStatusResponseDTO;
@@ -11,7 +10,9 @@ import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.controller.mapper.FriendshipMapper;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +44,8 @@ public class FriendshipController {
 
     @PutMapping("/{id}/accept")
     public ResponseEntity<FriendshipResponseDTO> acceptFriendRequest(@PathVariable UUID id) {
+        validateUserAccessToFriendship(id);
+
         Friendship accepted = friendshipService.acceptFriendRequest(id);
         return ResponseEntity.ok(friendshipMapper.toDTO(accepted));
     }
@@ -67,6 +70,8 @@ public class FriendshipController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFriendship(@PathVariable UUID id) {
+        validateUserAccessToFriendship(id);
+
         friendshipService.deleteFriendship(id);
         return ResponseEntity.ok().build();
     }
@@ -76,6 +81,8 @@ public class FriendshipController {
             @PathVariable UUID id,
             @RequestBody FriendshipRequestDTO request
     ) {
+        validateUserAccessToFriendship(id);
+
         Friendship updated = friendshipService.updateFriendship(id, request.isAccepted());
         return ResponseEntity.ok(friendshipMapper.toDTO(updated));
     }
@@ -95,5 +102,12 @@ public class FriendshipController {
 
         return ResponseEntity.ok(response);
     }
+    private void validateUserAccessToFriendship(UUID friendshipId) {
+        Friendship f = friendshipService.findFriendshipById(friendshipId);
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
 
+        if (!f.getUserId().equals(currentUserId) && !f.getFriendId().equals(currentUserId)) {
+            throw new AccessDeniedException("You are not allowed to manage this friendship");
+        }
+    }
 }

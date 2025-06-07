@@ -11,5 +11,6 @@ public interface FriendshipService {
     void deleteFriendship(UUID friendshipId);
     List<Friendship> getFriendsOfUser(UUID userId);
     Friendship updateFriendship(UUID friendshipId, boolean accepted);
+    Friendship findFriendshipById(UUID id);
     String getFriendshipStatus(UUID friendId);
 }

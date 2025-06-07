@@ -42,13 +42,17 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
+//        authenticatedUserProvider.validateCurrentUserAccess(id); will be removed later
         return userService.getUserById(id)
                 .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers().stream()
                 .map(userMapper::userToUserDTO)
@@ -83,6 +87,7 @@ public class UserController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PagedUserResponse> searchUsers(
             @RequestParam(required = false, defaultValue = "") String query,
             @RequestParam(defaultValue = "0") int offset,

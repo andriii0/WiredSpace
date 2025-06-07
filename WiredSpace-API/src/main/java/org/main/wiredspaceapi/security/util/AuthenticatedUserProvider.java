@@ -33,8 +33,15 @@ public class AuthenticatedUserProvider {
     }
     public void validateCurrentUserAccess(UUID targetId) {
         UUID currentId = getCurrentUserId();
-        if (!currentId.equals(targetId)) {
+
+        if (!currentId.equals(targetId) && !hasAdminRole()) {
             throw new SecurityException("Access denied: not your account.");
         }
+    }
+    public boolean hasAdminRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null &&
+                authentication.getAuthorities().stream()
+                        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN") || grantedAuthority.getAuthority().equals("ROLE_SUPPORT"));
     }
 }

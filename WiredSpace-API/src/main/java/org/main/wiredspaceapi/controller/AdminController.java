@@ -7,6 +7,7 @@ import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.controller.dto.args.DemoteAdminArgs;
 import org.main.wiredspaceapi.controller.dto.args.PromoteUserArgs;
 import org.main.wiredspaceapi.domain.enums.UserRole;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +18,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated() and (hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_SUPPORT'))")
 public class AdminController {
 
     private final AdminService adminService;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/promote")
@@ -32,6 +35,10 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/demote")
     public ResponseEntity<User> demoteAdminToUser(@RequestBody DemoteAdminArgs request) {
+        UUID currentAdminId = authenticatedUserProvider.getCurrentUserId();
+        if (currentAdminId.equals(request.getAdminId())) {
+            throw new IllegalArgumentException("You cannot delete/demote yourself.");
+        }
         return adminService.demoteAdminToUser(request.getAdminId(), request.getUserRole())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

@@ -47,10 +47,8 @@ public class SecurityConfig {
                         configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry ->
                         registry.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/users/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/users").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/login").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/api/users/**").authenticated()
                                 .requestMatchers("/notifications/**").authenticated()
                                 .requestMatchers("/ws/**").permitAll()
                                 .anyRequest().authenticated()

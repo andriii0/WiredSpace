@@ -45,7 +45,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public Friendship acceptFriendRequest(UUID friendshipId) {
-        Friendship friendship = findFriendshipOrThrow(friendshipId);
+        Friendship friendship = findFriendshipById(friendshipId);
 
         if (friendship.isAccepted()) {
             throw new IllegalStateException("Friend request already accepted.");
@@ -64,7 +64,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public void deleteFriendship(UUID friendshipId) {
-        Friendship friendship = findFriendshipOrThrow(friendshipId);
+        Friendship friendship = findFriendshipById(friendshipId);
         UUID currentId = authenticatedUserProvider.getCurrentUserId();
         if (friendship.getUserId().equals(currentId) || friendship.getFriendId().equals(currentId)) {
             friendshipRepository.delete(friendshipId);
@@ -84,7 +84,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     public Friendship updateFriendship(UUID friendshipId, boolean accepted) {
-        Friendship friendship = findFriendshipOrThrow(friendshipId);
+        Friendship friendship = findFriendshipById(friendshipId);
 
         Friendship updated = new Friendship(
                 friendship.getId(),
@@ -102,7 +102,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
     }
 
-    private Friendship findFriendshipOrThrow(UUID id) {
+    public Friendship findFriendshipById(UUID id) {
         return friendshipRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Friendship with ID " + id + " not found"));
     }

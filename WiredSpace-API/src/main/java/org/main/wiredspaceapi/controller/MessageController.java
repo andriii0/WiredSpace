@@ -9,6 +9,7 @@ import org.main.wiredspaceapi.domain.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/messages")
+@PreAuthorize("isAuthenticated()")
 public class MessageController {
 
     private final SimpMessagingTemplate messagingTemplate;
@@ -41,8 +43,6 @@ public class MessageController {
         MessageDTO sent = messageService.sendPrivateMessage(sender, messageDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(sent);
     }
-
-
 
     @GetMapping("/conversation/{userEmail}")
     public ResponseEntity<List<MessageDTO>> getMessagesBetween(@PathVariable String userEmail, Principal principal) {
