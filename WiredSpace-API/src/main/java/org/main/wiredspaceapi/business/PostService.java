@@ -2,7 +2,6 @@ package org.main.wiredspaceapi.business;
 
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
-import org.main.wiredspaceapi.domain.Comment;
 
 import java.util.List;
 

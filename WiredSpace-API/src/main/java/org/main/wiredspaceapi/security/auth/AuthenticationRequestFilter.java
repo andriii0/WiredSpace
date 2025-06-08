@@ -24,9 +24,11 @@ import static org.main.wiredspaceapi.config.SecurityConstants.SPRING_SECURITY_RO
 @Component
 public class AuthenticationRequestFilter extends OncePerRequestFilter {
 
+    private final TokenDecoder accessTokenDecoder;
 
-    @Autowired
-    private TokenDecoder accessTokenDecoder;
+    public AuthenticationRequestFilter(TokenDecoder accessTokenDecoder) {
+        this.accessTokenDecoder = accessTokenDecoder;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)

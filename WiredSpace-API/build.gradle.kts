@@ -40,6 +40,7 @@ sonar {
 
 		property("sonar.coverage.inclusions", "src/main/java/org/main/wiredspaceapi/business/**/*.java")
 		property("sonar.coverage.exclusions", "**/controller/**, **/persistence/**, **/security/**, **/config/**, **/dto/**")
+		property("sonar.exclusions", "**/build.gradle.kts")
 	}
 }
 
