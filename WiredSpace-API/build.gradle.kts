@@ -36,8 +36,10 @@ sonar {
 			(project.findProperty("sonar.token") ?: System.getenv("SONAR_TOKEN"))
 				?: throw GradleException("Sonar token not found in project properties or environment"))
 		property("sonar.junit.reportPaths", "build/test-results/test")
-		property("sonar.java.coveragePlugin", "jacoco")
-		property("sonar.jacoco.reportPath", "build/reports/jacoco/test/jacocoTestReport.xml")
+		property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
+
+		property("sonar.coverage.inclusions", "src/main/java/org/main/wiredspaceapi/business/**/*.java")
+		property("sonar.coverage.exclusions", "**/controller/**, **/persistence/**, **/security/**, **/config/**, **/dto/**")
 	}
 }
 
@@ -82,7 +84,13 @@ tasks.jacocoTestReport {
 tasks.withType<Test> {
 	useJUnitPlatform()
 	finalizedBy(tasks.jacocoTestReport)
+
+	reports {
+		junitXml.required.set(true)
+		html.required.set(true)
+	}
 }
+
 
 tasks.named("sonar") {
 	dependsOn("test", "jacocoTestReport")
