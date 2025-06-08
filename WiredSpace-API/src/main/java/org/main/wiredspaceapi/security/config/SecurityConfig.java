@@ -41,7 +41,7 @@ public class SecurityConfig {
                                            DaoAuthenticationProvider authenticationProvider) throws Exception {
         httpSecurity
                 .authenticationProvider(authenticationProvider)
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // NOSONAR: CSRF protection is not needed for stateless JWT auth
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(configurer ->
                         configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

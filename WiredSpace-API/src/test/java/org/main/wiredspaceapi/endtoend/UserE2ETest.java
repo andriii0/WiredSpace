@@ -14,6 +14,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,16 +43,20 @@ public class UserE2ETest {
     }
 
     private String loginAndGetToken(String email, String password) throws Exception {
+        Map<String, String> body = new HashMap<>();
+        body.put("email", email);
+        body.put("password", password);
+
         MvcResult loginResult = mockMvc.perform(post("/api/login")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("email", email)
-                        .param("password", password))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
                 .andReturn();
 
         return objectMapper.readTree(loginResult.getResponse().getContentAsString())
                 .get("token").asText();
     }
+
 
     @Test
     void createUser_shouldReturnOkAndUserData() throws Exception {
@@ -67,15 +74,17 @@ public class UserE2ETest {
     void loginUser_shouldReturnToken() throws Exception {
         registerUser("Login User", "login@example.com", "pass123");
 
+        Map<String, String> loginBody = new HashMap<>();
+        loginBody.put("email", "login@example.com");
+        loginBody.put("password", "pass123");
+
         mockMvc.perform(post("/api/login")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("email", "login@example.com")
-                        .param("password", "pass123"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginBody)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.name").value("Login User"));
     }
-
     @Test
     void getUserById_shouldReturnUser() throws Exception {
         String userId = registerUser("Get User", "get@example.com", "getpass");
