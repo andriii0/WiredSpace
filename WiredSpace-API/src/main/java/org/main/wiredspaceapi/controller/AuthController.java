@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.AdminService;
 import org.main.wiredspaceapi.business.UserService;
+import org.main.wiredspaceapi.controller.dto.args.LoginRequest;
 import org.main.wiredspaceapi.domain.Admin;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.persistence.UserRepository;
@@ -32,14 +33,14 @@ public class AuthController {
     private final AdminService adminService;
 
     @PostMapping
-    public ResponseEntity<Object> authenticate(@RequestParam String email,
-                                               @RequestParam String password) {
+    public ResponseEntity<Object> authenticate(@RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
 
-            Optional<User> userOpt = userService.findByEmail(email);
+
+            Optional<User> userOpt = userService.findByEmail(request.getEmail());
             if (userOpt.isPresent()) {
                 User u = userOpt.get();
                 String token = createJwt(u.getEmail(), u.getId(), u.getRoleAsString());
@@ -51,7 +52,7 @@ public class AuthController {
                 return ResponseEntity.ok(response);
             }
 
-            Optional<Admin> adminOpt = adminService.findAdminByEmail(email);
+            Optional<Admin> adminOpt = adminService.findAdminByEmail(request.getEmail());
             if (adminOpt.isPresent()) {
                 Admin a = adminOpt.get();
                 String token = createJwt(a.getEmail(), a.getId(), a.getRoleAsString());
