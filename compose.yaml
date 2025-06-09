@@ -17,7 +17,7 @@ services:
       target: export-stage
     image: wiredspace-frontend:build
     container_name: frontend
-    command: sh -c "sleep infinity"  # Чтобы не выходил сразу
+    command: sh -c "sleep infinity"
     networks:
       - app-net
     volumes:
