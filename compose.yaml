@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./WiredSpace-API
+    image: wiredspace-api:latest
+    container_name: backend
+    ports:
+      - "8080:8080"
+    networks:
+      - app-net
+
+  frontend:
+    build:
+      context: ./wiredspace-frontend
+      target: export-stage
+    image: wiredspace-frontend:build
+    container_name: frontend
+    command: sh -c "sleep infinity"  # Чтобы не выходил сразу
+    networks:
+      - app-net
+    volumes:
+      - frontend-static:/dist
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - frontend-static:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-net
+
+volumes:
+  frontend-static:
+
+networks:
+  app-net:
+    driver: bridge
