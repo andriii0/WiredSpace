@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FriendshipServiceImpl implements FriendshipService {
@@ -38,7 +37,6 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
 
         Friendship friendship = new Friendship(null, userId, friendId, false); //is not accepted by default
-        log.info("Sending friend request from {} to {}", userId, friendId);
 
         return friendshipRepository.save(friendship);
     }
@@ -58,7 +56,6 @@ public class FriendshipServiceImpl implements FriendshipService {
                 true
         );
 
-        log.info("Accepted friend request with ID {}", friendshipId);
         return friendshipRepository.save(accepted);
     }
 
@@ -68,7 +65,6 @@ public class FriendshipServiceImpl implements FriendshipService {
         UUID currentId = authenticatedUserProvider.getCurrentUserId();
         if (friendship.getUserId().equals(currentId) || friendship.getFriendId().equals(currentId)) {
             friendshipRepository.delete(friendshipId);
-            log.info("Deleted friendship between {} and {}", friendship.getUserId(), friendship.getFriendId());
         } else {
             throw new IllegalArgumentException("You cannot delete a friendship.");
         }
@@ -93,7 +89,6 @@ public class FriendshipServiceImpl implements FriendshipService {
                 accepted
         );
 
-        log.info("Updated friendship {} to accepted={}", friendshipId, accepted);
         return friendshipRepository.save(updated);
     }
 
