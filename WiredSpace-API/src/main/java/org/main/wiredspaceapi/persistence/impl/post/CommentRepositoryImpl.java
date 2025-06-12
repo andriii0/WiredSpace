@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -49,5 +50,15 @@ public class CommentRepositoryImpl implements CommentRepository {
     @Override
     public boolean existsById(Long id) {
         return postCommentDB.existsById(id);
+    }
+
+    @Override
+    public List<Comment> getCommentsByUserId(UUID userId) {
+        return mapper.toDomainList(postCommentDB.findAllByAuthor_Id(userId));
+    }
+
+    @Override
+    public void deleteAllByUserId(UUID userId) {
+        postCommentDB.deleteAllByAuthor_Id(userId);
     }
 }

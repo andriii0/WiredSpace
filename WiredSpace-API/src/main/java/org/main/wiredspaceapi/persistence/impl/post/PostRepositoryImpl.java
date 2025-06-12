@@ -60,6 +60,11 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     @Override
+    public boolean hasUserLikedPost(Long postId, UUID userId) {
+        return postLikeDB.hasUserLikedPost(postId, userId);
+    }
+
+    @Override
     public void likePost(Long postId, UUID userId) {
         PostLikeId likeId = new PostLikeId(postId, userId);
         if (postLikeDB.existsById(likeId)) return;
@@ -94,4 +99,40 @@ public class PostRepositoryImpl implements PostRepository {
                 .map(like -> like.getUser().getId())
                 .toList();
     }
+
+    @Override
+    public List<Post> getAllByUserId(UUID userId) {
+        return postDB.findAllByAuthor_Id(userId)
+                .stream()
+                .map(postEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void deleteAllByUserId(UUID userId) {
+        postDB.deleteAllByAuthor_Id(userId);
+    }
+
+    @Override
+    public List<Post> getPostsByUserId(UUID userId) {
+        return postDB.getPostsByAuthor_Id(userId)
+                .stream()
+                .map(postEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Post> getLikedPostsByUserId(UUID userId) {
+        return postLikeDB.findAllByUser_Id(userId)
+                .stream()
+                .map(PostLikeEntity::getPost)
+                .map(postEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void deleteAllLikesByUserId(UUID userId) {
+        postLikeDB.deleteAllByUser_Id(userId);
+    }
+
 }

@@ -11,6 +11,7 @@ public class PostDTO {
     private String content;
     private LocalDateTime createdAt;
     private UUID authorId;
+    private String authorName;
 
     private List<UUID> likedByUserIds;
     private List<CommentDTO> comments;

@@ -9,6 +9,7 @@ import java.util.UUID;
 public class CommentDTO {
     private Long id;
     private UUID authorId;
+    private String authorName;
     private Long postId;
     private String content;
     private LocalDateTime createdAt;

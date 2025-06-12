@@ -3,7 +3,10 @@ package org.main.wiredspaceapi.business.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.CommentService;
+import org.main.wiredspaceapi.controller.dto.post.CommentDTO;
+import org.main.wiredspaceapi.controller.mapper.CommentMapper;
 import org.main.wiredspaceapi.domain.Comment;
+import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.persistence.CommentRepository;
 import org.main.wiredspaceapi.persistence.PostRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
@@ -19,18 +22,25 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentMapper commentMapper;
 
-    @Override
-    public Comment createComment(Comment comment) {
+    public CommentDTO createComment(Comment comment) {
         if (!postRepository.existsById(comment.getPostId())) {
             throw new EntityNotFoundException("Post not found with id: " + comment.getPostId());
         }
-        if (userRepository.getUserById(comment.getAuthorId()).isEmpty()) {
-            throw new EntityNotFoundException("User not found with id: " + comment.getAuthorId());
-        }
+        User user = userRepository.getUserById(comment.getAuthorId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + comment.getAuthorId()));
+
         comment.setCreatedAt(LocalDateTime.now());
-        return commentRepository.create(comment);
+        Comment savedComment = commentRepository.create(comment);
+
+        CommentDTO dto = commentMapper.toDto(savedComment);
+
+        dto.setAuthorName(user.getName());
+
+        return dto;
     }
+
 
     @Override
     public Comment updateComment(Long commentId, String content) {

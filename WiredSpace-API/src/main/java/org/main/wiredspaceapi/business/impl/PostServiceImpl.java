@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.PostService;
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
+import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 import org.main.wiredspaceapi.controller.mapper.PostMapper;
+import org.main.wiredspaceapi.controller.mapper.UserMapper;
 import org.main.wiredspaceapi.domain.Comment;
 import org.main.wiredspaceapi.domain.Post;
 import org.main.wiredspaceapi.domain.User;
@@ -27,6 +29,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostMapper postConverter;
+    private final UserMapper userMapper;
     private final AuthenticatedUserProvider authenticatedUserProvider;
 
     @Override
@@ -41,7 +44,11 @@ public class PostServiceImpl implements PostService {
 
         post = postRepository.create(post);
 
-        return enrichWithLikes(postConverter.postToPostDto(post), post.getId());
+        PostDTO postDto = postConverter.postToPostDto(post);
+
+        postDto.setAuthorName(author.getName());
+
+        return enrichWithLikes(postDto, postDto.getId());
     }
 
     @Override
@@ -91,32 +98,41 @@ public class PostServiceImpl implements PostService {
         postRepository.deleteById(post.getId());
     }
 
-
-
     @Override
-    public void likePost(Long postId, String userId) {
-        UUID uuid = UUID.fromString(userId);
-        checkPostAndUserExist(postId, uuid);
-        postRepository.likePost(postId, uuid);
+    public void likePost(Long postId, UUID userId) {
+        checkPostAndUserExist(postId, userId);
+
+        boolean alreadyLiked = postRepository.hasUserLikedPost(postId, userId);
+
+        if (alreadyLiked) {
+            postRepository.unlikePost(postId, userId);
+        } else {
+            postRepository.likePost(postId, userId);
+        }
     }
 
-    @Override
-    public void unlikePost(Long postId, String userId) {
-        UUID uuid = UUID.fromString(userId);
-        checkPostAndUserExist(postId, uuid);
-        postRepository.unlikePost(postId, uuid);
-    }
+//    @Override
+//    public void unlikePost(Long postId, String userId) {
+//        UUID uuid = UUID.fromString(userId);
+//        checkPostAndUserExist(postId, uuid);
+//        postRepository.unlikePost(postId, uuid);
+//    }
 
     @Override
-    public List<String> getUsersWhoLikedPost(Long postId) {
+    public List<UserDTO> getUsersWhoLikedPost(Long postId) {
         if (!postRepository.existsById(postId)) {
             throw new EntityNotFoundException("Post not found with id: " + postId);
         }
-        return postRepository.getUsersWhoLikedPost(postId)
-                .stream()
-                .map(UUID::toString)
+
+        List<UUID> userIds = postRepository.getUsersWhoLikedPost(postId);
+
+        return userIds.stream()
+                .map(userId -> userRepository.getUserById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId)))
+                .map(userMapper::userToUserDTO)
                 .toList();
     }
+
 
     private void checkPostAndUserExist(Long postId, UUID userId) {
         if (!postRepository.existsById(postId)) {

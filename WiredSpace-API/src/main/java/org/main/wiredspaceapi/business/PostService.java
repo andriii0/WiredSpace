@@ -2,8 +2,10 @@ package org.main.wiredspaceapi.business;
 
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
+import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface PostService {
     PostDTO createPost(PostCreateDTO postCreateDTO);
@@ -14,7 +16,7 @@ public interface PostService {
 
     //like part
 
-    void likePost(Long postId, String userId);
-    void unlikePost(Long postId, String userId);
-    List<String> getUsersWhoLikedPost(Long postId);
+    void likePost(Long postId, UUID userId);
+//    void unlikePost(Long postId, String userId);
+    List<UserDTO> getUsersWhoLikedPost(Long postId);
 }

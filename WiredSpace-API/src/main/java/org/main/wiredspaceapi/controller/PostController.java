@@ -1,9 +1,14 @@
 package org.main.wiredspaceapi.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.main.wiredspaceapi.business.CommentService;
 import org.main.wiredspaceapi.business.PostService;
+import org.main.wiredspaceapi.controller.dto.post.CommentDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
+import org.main.wiredspaceapi.controller.dto.user.UserDTO;
+import org.main.wiredspaceapi.controller.mapper.CommentMapper;
+import org.main.wiredspaceapi.domain.Comment;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +27,8 @@ public class PostController {
 
     private final PostService postService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final CommentService commentService;
+    private final CommentMapper commentMapper;
 
     @PostMapping
     public ResponseEntity<PostDTO> createPost(@RequestBody PostCreateDTO dto) {
@@ -70,31 +77,85 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    //like part
-
     @PostMapping("/{id}/like")
-    public ResponseEntity<Void> likePost(
+    public ResponseEntity<Void> likePost( //switch
             @PathVariable Long id
     ) {
         UUID userId = authenticatedUserProvider.getCurrentUserId();
-        postService.likePost(id, userId.toString());
+        postService.likePost(id, userId);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{id}/like")
-    public ResponseEntity<Void> unlikePost(
-            @PathVariable Long id
-    ) {
-        UUID userId = authenticatedUserProvider.getCurrentUserId();
-        postService.unlikePost(id, userId.toString());
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/{id}/like")
+//    public ResponseEntity<Void> unlikePost(
+//            @PathVariable Long id
+//    ) {
+//        UUID userId = authenticatedUserProvider.getCurrentUserId();
+//        postService.unlikePost(id, userId.toString());
+//        return ResponseEntity.noContent().build();
+//    }
 
     @GetMapping("/{id}/likes")
-    public ResponseEntity<List<String>> getUsersWhoLikedPost(
+    public ResponseEntity<List<UserDTO>> getUsersWhoLikedPost(
             @PathVariable Long id
     ) {
-        List<String> userIds = postService.getUsersWhoLikedPost(id);
-        return ResponseEntity.ok(userIds);
+        List<UserDTO> users = postService.getUsersWhoLikedPost(id);
+        return ResponseEntity.ok(users);
     }
+
+    @PostMapping("/{postId}/comments")
+    public ResponseEntity<CommentDTO> addComment(
+            @PathVariable Long postId,
+            @RequestBody CommentDTO commentDTO
+    ) {
+        UUID userId = authenticatedUserProvider.getCurrentUserId();
+        commentDTO.setPostId(postId);
+        commentDTO.setAuthorId(userId);
+
+        Comment comment = commentMapper.toEntity(commentDTO);
+        CommentDTO created = commentService.createComment(comment);
+
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/comments")
+    public ResponseEntity<List<CommentDTO>> getAllComments() {
+        List<Comment> comments = commentService.getAllComments();
+        List<CommentDTO> dtos = comments.stream()
+                .map(commentMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<List<CommentDTO>> getCommentsByPost(@PathVariable Long postId) {
+        List<Comment> comments = commentService.getCommentsByPostId(postId);
+        List<CommentDTO> dtos = comments.stream()
+                .map(commentMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/comments/{commentId}")
+    public ResponseEntity<CommentDTO> getCommentById(@PathVariable Long commentId) {
+        Comment comment = commentService.getCommentById(commentId);
+        CommentDTO dto = commentMapper.toDto(comment);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<CommentDTO> updateComment(
+            @PathVariable Long commentId,
+            @RequestBody String content
+    ) {
+        UUID userId = authenticatedUserProvider.getCurrentUserId();
+        Comment existing = commentService.getCommentById(commentId);
+        if (!existing.getAuthorId().equals(userId)) {
+            return ResponseEntity.status(403).build();
+        }
+        Comment updated = commentService.updateComment(commentId, content);
+        CommentDTO dto = commentMapper.toDto(updated);
+        return ResponseEntity.ok(dto);
+    }
+
 }
