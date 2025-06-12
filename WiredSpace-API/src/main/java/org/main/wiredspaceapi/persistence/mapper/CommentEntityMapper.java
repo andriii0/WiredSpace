@@ -21,6 +21,7 @@ public interface CommentEntityMapper {
 
     // ENTITY -> DOMAIN
     @Mappings({
+            @Mapping(source = "author.name", target = "authorName"),
             @Mapping(target = "postId", source = "post.id"),
             @Mapping(target = "authorId", source = "author.id")
     })

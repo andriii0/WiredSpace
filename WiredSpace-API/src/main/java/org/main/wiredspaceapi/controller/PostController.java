@@ -36,9 +36,9 @@ public class PostController {
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
-    @GetMapping
-    public ResponseEntity<List<PostDTO>> getAllPosts() {
-        List<PostDTO> posts = postService.getAllPosts();
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PostDTO>> getAllPostsByUserId(@PathVariable UUID userId) {
+        List<PostDTO> posts = postService.getPostsByUserId(userId);
         return ResponseEntity.ok(posts);
     }
 
@@ -118,14 +118,14 @@ public class PostController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    @GetMapping("/comments")
-    public ResponseEntity<List<CommentDTO>> getAllComments() {
-        List<Comment> comments = commentService.getAllComments();
-        List<CommentDTO> dtos = comments.stream()
-                .map(commentMapper::toDto)
-                .toList();
-        return ResponseEntity.ok(dtos);
-    }
+//    @GetMapping("/comments")
+//    public ResponseEntity<List<CommentDTO>> getAllComments() {
+//        List<Comment> comments = commentService.getAllComments();
+//        List<CommentDTO> dtos = comments.stream()
+//                .map(commentMapper::toDto)
+//                .toList();
+//        return ResponseEntity.ok(dtos);
+//    }
 
     @GetMapping("/{postId}/comments")
     public ResponseEntity<List<CommentDTO>> getCommentsByPost(@PathVariable Long postId) {

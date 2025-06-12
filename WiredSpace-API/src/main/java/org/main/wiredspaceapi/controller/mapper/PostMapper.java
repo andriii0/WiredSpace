@@ -17,6 +17,7 @@ public interface PostMapper {
     Post postCreateDtoToPost(PostCreateDTO dto);
 
     @Mapping(source = "author.id", target = "authorId")
+    @Mapping(source = "author.name", target = "authorName")
     @Mapping(target = "likedByUserIds", expression = "java(mapUsersToUUIDs(post.getLikedBy()))")
     @Mapping(target = "comments", expression = "java(mapComments(post.getComments()))")
     PostDTO postToPostDto(Post post);

@@ -46,18 +46,18 @@ public class PostServiceImpl implements PostService {
 
         PostDTO postDto = postConverter.postToPostDto(post);
 
-        postDto.setAuthorName(author.getName());
-
         return enrichWithLikes(postDto, postDto.getId());
     }
 
     @Override
-    public List<PostDTO> getAllPosts() {
-        return postRepository.getAll()
-                .stream()
+    public List<PostDTO> getPostsByUserId(UUID userId) {
+        List<Post> posts = postRepository.getPostsByUserId(userId);
+
+        return posts.stream()
                 .map(post -> enrichWithLikes(postConverter.postToPostDto(post), post.getId()))
                 .toList();
     }
+
 
     @Override
     public PostDTO getPostById(Long id) {

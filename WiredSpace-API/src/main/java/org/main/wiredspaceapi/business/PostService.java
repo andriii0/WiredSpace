@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface PostService {
     PostDTO createPost(PostCreateDTO postCreateDTO);
-    List<PostDTO> getAllPosts();
+    List<PostDTO> getPostsByUserId(UUID userId);
     PostDTO getPostById(Long id);
     PostDTO updatePost(Long id, PostCreateDTO dto);
     void deletePost(Long id); //TODO change to bool
