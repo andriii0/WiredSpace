@@ -34,6 +34,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDTO createPost(PostCreateDTO dto) {
+        validatePostContent(dto.getContent());
+
         UUID userId = authenticatedUserProvider.getCurrentUserId();
         User author = userRepository.getUserById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
@@ -70,6 +72,8 @@ public class PostServiceImpl implements PostService {
     public PostDTO updatePost(Long id, PostCreateDTO dto) {
         Post existingPost = postRepository.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
+
+        validatePostContent(dto.getContent());
 
         UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
         if (!existingPost.getAuthor().getId().equals(currentUserId)) {
@@ -147,4 +151,14 @@ public class PostServiceImpl implements PostService {
         dto.setLikedByUserIds(postRepository.getUsersWhoLikedPost(postId));
         return dto;
     }
+
+    private void validatePostContent(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Post content must not be empty");
+        }
+        if (content.length() > 1000) {
+            throw new IllegalArgumentException("Post content exceeds 1000 characters");
+        }
+    }
+
 }

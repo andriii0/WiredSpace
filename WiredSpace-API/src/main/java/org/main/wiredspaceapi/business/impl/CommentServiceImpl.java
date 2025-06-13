@@ -28,6 +28,9 @@ public class CommentServiceImpl implements CommentService {
         if (!postRepository.existsById(comment.getPostId())) {
             throw new EntityNotFoundException("Post not found with id: " + comment.getPostId());
         }
+
+        validateCommentContent(comment.getContent());
+
         User user = userRepository.getUserById(comment.getAuthorId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + comment.getAuthorId()));
 
@@ -46,6 +49,9 @@ public class CommentServiceImpl implements CommentService {
     public Comment updateComment(Long commentId, String content) {
         Comment existing = commentRepository.getById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + commentId));
+
+        validateCommentContent(existing.getContent());
+
         existing.setContent(content);
         return commentRepository.update(existing);
     }
@@ -76,4 +82,13 @@ public class CommentServiceImpl implements CommentService {
         }
         return commentRepository.getByPostId(postId);
     }
+    private void validateCommentContent(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Comment content must not be empty");
+        }
+        if (content.length() > 500) {
+            throw new IllegalArgumentException("Comment content exceeds 500 characters");
+        }
+    }
+
 }
