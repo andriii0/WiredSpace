@@ -157,5 +157,14 @@ public class PostController {
         CommentDTO dto = commentMapper.toDto(updated);
         return ResponseEntity.ok(dto);
     }
-
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+        UUID userId = authenticatedUserProvider.getCurrentUserId();
+        Comment comment = commentService.getCommentById(commentId);
+        if (!comment.getAuthorId().equals(userId)) {
+            return ResponseEntity.status(403).build();
+        }
+        commentService.deleteComment(commentId);
+        return ResponseEntity.noContent().build();
+    }
 }

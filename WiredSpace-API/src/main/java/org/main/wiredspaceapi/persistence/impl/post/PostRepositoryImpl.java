@@ -115,11 +115,12 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public List<Post> getPostsByUserId(UUID userId) {
-        return postDB.getPostsByAuthor_Id(userId)
+        return postDB.findPostsWithCommentsByAuthorId(userId)
                 .stream()
                 .map(postEntityMapper::toDomain)
                 .toList();
     }
+
 
     @Override
     public List<Post> getLikedPostsByUserId(UUID userId) {
