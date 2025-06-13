@@ -23,6 +23,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
+    private final UserStatisticsService userStatisticsService;
 
     public CommentDTO createComment(Comment comment) {
         if (!postRepository.existsById(comment.getPostId())) {
@@ -37,20 +38,20 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreatedAt(LocalDateTime.now());
         Comment savedComment = commentRepository.create(comment);
 
-        CommentDTO dto = commentMapper.toDto(savedComment);
+        userStatisticsService.incrementComments(user.getId());
 
+        CommentDTO dto = commentMapper.toDto(savedComment);
         dto.setAuthorName(user.getName());
 
         return dto;
     }
-
 
     @Override
     public Comment updateComment(Long commentId, String content) {
         Comment existing = commentRepository.getById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + commentId));
 
-        validateCommentContent(existing.getContent());
+        validateCommentContent(content);
 
         existing.setContent(content);
         return commentRepository.update(existing);
@@ -58,10 +59,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long commentId) {
-        if (!commentRepository.existsById(commentId)) {
-            throw new EntityNotFoundException("Comment not found with id: " + commentId);
-        }
+        Comment comment = commentRepository.getById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + commentId));
+
         commentRepository.deleteById(commentId);
+
+        userStatisticsService.decrementComments(comment.getAuthorId());
     }
 
     @Override

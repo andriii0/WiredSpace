@@ -5,6 +5,8 @@ import jdk.jshell.Snippet;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.main.wiredspaceapi.domain.enums.UserRole;
+
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,4 +24,14 @@ public class UserEntity extends AccountEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PostLikeEntity> likedPosts = new HashSet<>();
+
+    @Column(nullable = true)
+    private int commentsCount = 0;
+
+    @Column(nullable = true)
+    private int friendsCount = 0;
+
+    public int getLikesGiven() {
+        return likedPosts == null ? 0 : likedPosts.size();
+    }
 }

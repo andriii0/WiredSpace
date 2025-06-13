@@ -9,6 +9,8 @@ import org.main.wiredspaceapi.persistence.mapper.UserEntityMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,8 +23,17 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserEntityMapper accountMapper;
 
     @Override
-    public User createUser(String name, String email, String password, UserRole userRole) {
-        User user = new User(name, email, password, userRole);
+    public User createUser(String name, String email, String password, UserRole userRole, LocalDateTime registerTime) {
+        User user = User.builder()
+                .name(name)
+                .email(email)
+                .password(password)
+                .role(userRole)
+                .registeredAt(LocalDateTime.now())
+                .friendsCount(0)
+                .commentsCount(0)
+                .likesGiven(0)
+                .build();
         UserEntity entity = accountMapper.toEntity(user);
         UserEntity saved = userDB.save(entity);
         return accountMapper.toDomain(saved);
@@ -65,6 +76,15 @@ public class UserRepositoryImpl implements UserRepository {
         });
     }
 
+    @Override
+    public void updateStatistics(User user) {
+        userDB.findById(user.getId()).ifPresent(entity -> {
+            entity.setFriendsCount(user.getFriendsCount());
+            entity.setCommentsCount(user.getCommentsCount());
+
+            userDB.save(entity);
+        });
+    }
 
     @Override
     public List<User> searchUsers(String query, int offset, int limit) {

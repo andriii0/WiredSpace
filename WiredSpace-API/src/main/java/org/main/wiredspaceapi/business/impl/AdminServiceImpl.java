@@ -9,8 +9,10 @@ import org.main.wiredspaceapi.domain.enums.AdminRole;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,7 +46,7 @@ public class AdminServiceImpl implements AdminService {
         Admin admin = adminOpt.get();
         adminRepository.deleteAdmin(adminId);
         return Optional.of(
-                userRepository.createUser(admin.getName(), admin.getEmail(), admin.getPassword(), userRole)
+                userRepository.createUser(admin.getName(), admin.getEmail(), admin.getPassword(), userRole, LocalDateTime.now())
         );
     }
 

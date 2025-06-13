@@ -10,6 +10,7 @@ import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,9 +31,8 @@ public class UserServiceImpl implements UserService {
         if (existingUser.isPresent()) {
             throw new IllegalArgumentException("Email " + email + " is already in use");
         }
-
         String encodedPassword = passwordEncoder.encode(password);
-        return userRepository.createUser(name, email, encodedPassword, userRole);
+        return userRepository.createUser(name, email, encodedPassword, userRole, LocalDateTime.now());
     }
 
 

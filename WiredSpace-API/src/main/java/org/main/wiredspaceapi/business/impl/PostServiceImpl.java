@@ -31,6 +31,7 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postConverter;
     private final UserMapper userMapper;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final UserStatisticsService userStatisticsService;
 
     @Override
     public PostDTO createPost(PostCreateDTO dto) {
@@ -110,8 +111,10 @@ public class PostServiceImpl implements PostService {
 
         if (alreadyLiked) {
             postRepository.unlikePost(postId, userId);
+            userStatisticsService.decrementLikes(userId);
         } else {
             postRepository.likePost(postId, userId);
+            userStatisticsService.incrementLikes(userId);
         }
     }
 

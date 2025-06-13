@@ -44,13 +44,13 @@ public class UserController {
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
-//        authenticatedUserProvider.validateCurrentUserAccess(id); will be removed later
         return userService.getUserById(id)
                 .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    //TODO REMOVE ( USED IN FRONTEND MESSAGING )
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<UserDTO>> getAllUsers() {

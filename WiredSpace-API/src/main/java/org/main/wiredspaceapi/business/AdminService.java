@@ -16,6 +16,7 @@ public interface AdminService {
     Optional<User> demoteAdminToUser(UUID adminId, UserRole userRole);
     Optional<Admin> findAdminByEmail(String email);
 
+
     //Service Part
     Optional<User> getUserById(UUID id);
     Optional<User> getUserByEmail(String email);

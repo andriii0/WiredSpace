@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @SuperBuilder
@@ -24,4 +25,7 @@ public abstract class AccountEntity {
     private String name;
     private String email;
     private String password;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime registeredAt = LocalDateTime.now();
 }

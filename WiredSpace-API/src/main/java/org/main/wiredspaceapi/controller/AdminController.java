@@ -2,6 +2,8 @@ package org.main.wiredspaceapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.AdminService;
+import org.main.wiredspaceapi.business.impl.UserStatisticsService;
+import org.main.wiredspaceapi.controller.dto.user.UserStatisticsDTO;
 import org.main.wiredspaceapi.domain.Admin;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.controller.dto.args.DemoteAdminArgs;
@@ -23,6 +25,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final UserStatisticsService userStatisticsService;
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/promote")
@@ -60,6 +63,15 @@ public class AdminController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/statistics/{userId}")
+    public ResponseEntity<UserStatisticsDTO> getStatistics(@PathVariable UUID userId) {
+        UserStatisticsDTO stats = userStatisticsService.getUserStatistics(userId);
+        return ResponseEntity.ok(stats);
+    }
+
+
 
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN_ROLE')")
 //    @PutMapping("/user/{id}")
