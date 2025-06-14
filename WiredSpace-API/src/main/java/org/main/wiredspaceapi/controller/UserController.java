@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.controller.dto.user.PagedUserResponse;
+import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.controller.mapper.UserMapper;
 import org.main.wiredspaceapi.controller.dto.user.UserCreateDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
@@ -44,10 +45,10 @@ public class UserController {
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
-        return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
-                .orElse(ResponseEntity.notFound().build());
+        User user = userService.getUserById(id).get();
+        return ResponseEntity.ok(userMapper.userToUserDTO(user));
     }
+
 
 //    @PreAuthorize("hasRole('ROLE_ADMIN')")
     //TODO REMOVE ( USED IN FRONTEND MESSAGING )
@@ -62,20 +63,14 @@ public class UserController {
 
     @PutMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserDTO> updateCurrentUser(
-            @Valid @RequestBody UserUpdateDTO dto
-    ) {
-        Optional<User> updated = userService.updateUserById(
+    public ResponseEntity<UserDTO> updateCurrentUser(@Valid @RequestBody UserUpdateDTO dto) {
+        User updated = userService.updateUserById(
                 authenticatedUserProvider.getCurrentUserId(),
                 dto.getName(),
                 dto.getEmail(),
                 dto.getPassword()
-        );
-
-
-        return updated
-                .map(user -> ResponseEntity.ok(userMapper.userToUserDTO(user)))
-                .orElse(ResponseEntity.notFound().build());
+        ).get();
+        return ResponseEntity.ok(userMapper.userToUserDTO(updated));
     }
 
     @DeleteMapping("/me")

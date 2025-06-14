@@ -1,5 +1,6 @@
 package org.main.wiredspaceapi.security.util;
 
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedException;
 import org.main.wiredspaceapi.security.token.AccessToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,7 +15,7 @@ public class AuthenticatedUserProvider {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !(authentication.getDetails() instanceof AccessToken token)) {
-            throw new IllegalStateException("AccessToken not found in authentication context");
+            throw new UnauthorizedException("AccessToken not found in authentication context");
         }
 
         return token.getAccountId();
@@ -28,20 +29,25 @@ public class AuthenticatedUserProvider {
     public void validateCurrentUserAccess(String targetEmail) {
         String currentEmail = getCurrentUserEmail();
         if (!currentEmail.equals(targetEmail)) {
-            throw new SecurityException("Access denied: not your account.");
+            throw new UnauthorizedException("Access denied: not your account.");
         }
     }
+
     public void validateCurrentUserAccess(UUID targetId) {
         UUID currentId = getCurrentUserId();
 
         if (!currentId.equals(targetId) && !hasAdminRole()) {
-            throw new SecurityException("Access denied: not your account.");
+            throw new UnauthorizedException("Access denied: not your account.");
         }
     }
+
     public boolean hasAdminRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null &&
                 authentication.getAuthorities().stream()
-                        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN") || grantedAuthority.getAuthority().equals("ROLE_SUPPORT"));
+                        .anyMatch(grantedAuthority ->
+                                grantedAuthority.getAuthority().equals("ROLE_ADMIN")
+                                        || grantedAuthority.getAuthority().equals("ROLE_SUPPORT")
+                        );
     }
 }

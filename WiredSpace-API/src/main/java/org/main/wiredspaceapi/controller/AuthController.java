@@ -4,16 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.AdminService;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.controller.dto.args.LoginRequest;
+import org.main.wiredspaceapi.controller.exceptions.InvalidCredentialsException;
+import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.domain.Admin;
 import org.main.wiredspaceapi.domain.User;
-import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.security.token.AccessToken;
 import org.main.wiredspaceapi.security.token.TokenEncoder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,42 +37,32 @@ public class AuthController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
-
-
-            Optional<User> userOpt = userService.findByEmail(request.getEmail());
-            if (userOpt.isPresent()) {
-                User u = userOpt.get();
-                String token = createJwt(u.getEmail(), u.getId(), u.getRoleAsString());
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("token", token);
-                response.put("name", u.getName());
-
-                return ResponseEntity.ok(response);
-            }
-
-            Optional<Admin> adminOpt = adminService.findAdminByEmail(request.getEmail());
-            if (adminOpt.isPresent()) {
-                Admin a = adminOpt.get();
-                String token = createJwt(a.getEmail(), a.getId(), a.getRoleAsString());
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("token", token);
-                response.put("name", a.getName());
-
-                return ResponseEntity.ok(response);
-            }
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Account not found");
-
         } catch (AuthenticationException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Invalid email or password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
+
+        Optional<User> userOpt = userService.findByEmail(request.getEmail());
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            return ResponseEntity.ok(createResponse(user.getEmail(), user.getId(), user.getRoleAsString(), user.getName()));
+        }
+
+        Optional<Admin> adminOpt = adminService.findAdminByEmail(request.getEmail());
+        if (adminOpt.isPresent()) {
+            Admin admin = adminOpt.get();
+            return ResponseEntity.ok(createResponse(admin.getEmail(), admin.getId(), admin.getRoleAsString(), admin.getName()));
+        }
+
+        throw new UserNotFoundException("Account not found");
     }
 
-
+    private Map<String, Object> createResponse(String email, UUID id, String role, String name) {
+        String token = createJwt(email, id, role);
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("name", name);
+        return response;
+    }
 
     private String createJwt(String subject, UUID accountId, String role) {
         AccessToken token = AccessToken.builder()
@@ -83,5 +72,4 @@ public class AuthController {
                 .build();
         return accessTokenEncoder.encode(token);
     }
-
 }

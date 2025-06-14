@@ -3,8 +3,9 @@ package org.main.wiredspaceapi.controller;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.MessageService;
 import org.main.wiredspaceapi.business.UserService;
-import org.main.wiredspaceapi.controller.mapper.MessageMapper;
 import org.main.wiredspaceapi.controller.dto.message.MessageDTO;
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedException;
+import org.main.wiredspaceapi.controller.mapper.MessageMapper;
 import org.main.wiredspaceapi.domain.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +31,14 @@ public class MessageController {
     @PostMapping("/private")
     public ResponseEntity<MessageDTO> sendPrivateMessage(@RequestBody MessageDTO messageDTO, Principal principal) {
         if (principal == null || principal.getName() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new UnauthorizedException("Authentication required to send messages.");
         }
 
         String sender = principal.getName();
         String recipient = messageDTO.getTo();
 
-        if (!userService.findByEmail(recipient).isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        userService.findByEmail(recipient)
+                .orElseThrow(() -> new UnauthorizedException("Recipient does not exist."));
 
         MessageDTO sent = messageService.sendPrivateMessage(sender, messageDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(sent);
@@ -47,7 +47,7 @@ public class MessageController {
     @GetMapping("/conversation/{userEmail}")
     public ResponseEntity<List<MessageDTO>> getMessagesBetween(@PathVariable String userEmail, Principal principal) {
         if (principal == null || principal.getName() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new UnauthorizedException("Authentication required to view messages.");
         }
 
         String currentUser = principal.getName();

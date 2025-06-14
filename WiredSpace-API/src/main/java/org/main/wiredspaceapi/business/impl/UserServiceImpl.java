@@ -3,6 +3,8 @@ package org.main.wiredspaceapi.business.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.UserService;
+import org.main.wiredspaceapi.controller.exceptions.AccountAlreadyExistsException;
+import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
@@ -29,7 +31,7 @@ public class UserServiceImpl implements UserService {
     public User createUser(String name, String email, String password, UserRole userRole) {
         Optional<User> existingUser = userRepository.findByEmail(email);
         if (existingUser.isPresent()) {
-            throw new IllegalArgumentException("Email " + email + " is already in use");
+            throw new AccountAlreadyExistsException("Email " + email + " is already in use");
         }
         String encodedPassword = passwordEncoder.encode(password);
         return userRepository.createUser(name, email, encodedPassword, userRole, LocalDateTime.now());
@@ -54,10 +56,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> updateUserById(UUID userId, String newName, String newEmail, String newPassword) {
-        Optional<User> userOptional = userRepository.getUserById(userId);
-        if (userOptional.isEmpty()) return Optional.empty();
-
-        User user = userOptional.get();
+        User user = userRepository.getUserById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
         String nameToSet = (newName != null && !newName.trim().isEmpty()) ? newName : user.getName();
         String emailToSet = (newEmail != null && !newEmail.trim().isEmpty()) ? newEmail : user.getEmail();
@@ -75,14 +75,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserByEmail(String targetEmail) {
-        Optional<User> user = findByEmail(targetEmail);
-        if (user.isPresent()) {
-            userProvider.validateCurrentUserAccess(targetEmail);
+        User user = findByEmail(targetEmail)
+                .orElseThrow(() -> new UserNotFoundException("User with email " + targetEmail + " not found"));
 
-            userDeletionService.deleteUserCompletely(user.get().getId());
-        }
+        userProvider.validateCurrentUserAccess(targetEmail);
+        userDeletionService.deleteUserCompletely(user.getId());
     }
-
 
     @Override
     public List<User> searchUsers(String query, int offset, int limit) {

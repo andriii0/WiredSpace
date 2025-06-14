@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.main.wiredspaceapi.business.FriendshipService;
 import org.main.wiredspaceapi.business.impl.UserStatisticsService;
+import org.main.wiredspaceapi.controller.exceptions.FriendshipAlreadyAcceptedException;
+import org.main.wiredspaceapi.controller.exceptions.FriendshipAlreadyExistsException;
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedFriendshipAccessException;
+import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.persistence.FriendshipRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
@@ -29,13 +33,13 @@ public class FriendshipServiceImpl implements FriendshipService {
         validateUserExistence(friendId);
 
         if (userId.equals(friendId)) {
-            throw new IllegalArgumentException("You cannot send a friend request to yourself.");
+            throw new FriendshipAlreadyExistsException("You cannot send a friend request to yourself.");
         }
 
         Optional<Friendship> friendshipOptional = friendshipRepository.findByUserAndFriend(userId, friendId);
 
         if (friendshipOptional.isPresent()) {
-            throw new IllegalArgumentException("You cannot send a friend request to your friend.");
+            throw new FriendshipAlreadyExistsException("You already have a friendship with this user.");
         }
 
         Friendship friendship = new Friendship(null, userId, friendId, false); // is not accepted by default
@@ -48,7 +52,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         Friendship friendship = findFriendshipById(friendshipId);
 
         if (friendship.isAccepted()) {
-            throw new IllegalStateException("Friend request already accepted.");
+            throw new FriendshipAlreadyAcceptedException("Friend request already accepted.");
         }
 
         Friendship accepted = new Friendship(
@@ -78,7 +82,7 @@ public class FriendshipServiceImpl implements FriendshipService {
                 userStatisticsService.decrementFriends(friendship.getFriendId());
             }
         } else {
-            throw new IllegalArgumentException("You cannot delete a friendship.");
+            throw new UnauthorizedFriendshipAccessException("You are not allowed to delete this friendship.");
         }
 
     }
@@ -118,7 +122,7 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     private void validateUserExistence(UUID userId) {
         userRepository.getUserById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
     }
 
     public Friendship findFriendshipById(UUID id) {

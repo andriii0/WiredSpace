@@ -7,6 +7,7 @@ import org.main.wiredspaceapi.controller.dto.post.CommentDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedPostActionException;
 import org.main.wiredspaceapi.controller.mapper.CommentMapper;
 import org.main.wiredspaceapi.domain.Comment;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
@@ -49,14 +50,12 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> updatePost(
-            @PathVariable Long id,
-            @RequestBody PostCreateDTO dto
-    ) {
+    public ResponseEntity<PostDTO> updatePost(@PathVariable Long id, @RequestBody PostCreateDTO dto) {
         UUID userId = authenticatedUserProvider.getCurrentUserId();
-        PostDTO existingPost = postService.getPostById(id);
-        if (!existingPost.getAuthorId().equals(userId)) {
-            return ResponseEntity.status(403).build();
+        PostDTO post = postService.getPostById(id);
+
+        if (!post.getAuthorId().equals(userId)) {
+            throw new UnauthorizedPostActionException("You are not the owner of this post.");
         }
 
         PostDTO updated = postService.updatePost(id, dto);
@@ -64,13 +63,12 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         UUID userId = authenticatedUserProvider.getCurrentUserId();
-        PostDTO existingPost = postService.getPostById(id);
-        if (!existingPost.getAuthorId().equals(userId)) {
-            return ResponseEntity.status(403).build();
+        PostDTO post = postService.getPostById(id);
+
+        if (!post.getAuthorId().equals(userId)) {
+            throw new UnauthorizedPostActionException("You are not the owner of this post.");
         }
 
         postService.deletePost(id);
@@ -78,27 +76,14 @@ public class PostController {
     }
 
     @PostMapping("/{id}/like")
-    public ResponseEntity<Void> likePost( //switch
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<Void> likePost(@PathVariable Long id) {
         UUID userId = authenticatedUserProvider.getCurrentUserId();
         postService.likePost(id, userId);
         return ResponseEntity.ok().build();
     }
 
-//    @DeleteMapping("/{id}/like")
-//    public ResponseEntity<Void> unlikePost(
-//            @PathVariable Long id
-//    ) {
-//        UUID userId = authenticatedUserProvider.getCurrentUserId();
-//        postService.unlikePost(id, userId.toString());
-//        return ResponseEntity.noContent().build();
-//    }
-
     @GetMapping("/{id}/likes")
-    public ResponseEntity<List<UserDTO>> getUsersWhoLikedPost(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<List<UserDTO>> getUsersWhoLikedPost(@PathVariable Long id) {
         List<UserDTO> users = postService.getUsersWhoLikedPost(id);
         return ResponseEntity.ok(users);
     }
@@ -117,15 +102,6 @@ public class PostController {
 
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
-
-//    @GetMapping("/comments")
-//    public ResponseEntity<List<CommentDTO>> getAllComments() {
-//        List<Comment> comments = commentService.getAllComments();
-//        List<CommentDTO> dtos = comments.stream()
-//                .map(commentMapper::toDto)
-//                .toList();
-//        return ResponseEntity.ok(dtos);
-//    }
 
     @GetMapping("/{postId}/comments")
     public ResponseEntity<List<CommentDTO>> getCommentsByPost(@PathVariable Long postId) {
@@ -149,21 +125,25 @@ public class PostController {
             @RequestBody String content
     ) {
         UUID userId = authenticatedUserProvider.getCurrentUserId();
-        Comment existing = commentService.getCommentById(commentId);
-        if (!existing.getAuthorId().equals(userId)) {
-            return ResponseEntity.status(403).build();
+        Comment comment = commentService.getCommentById(commentId);
+
+        if (!comment.getAuthorId().equals(userId)) {
+            throw new UnauthorizedPostActionException("You are not the owner of this comment.");
         }
+
         Comment updated = commentService.updateComment(commentId, content);
-        CommentDTO dto = commentMapper.toDto(updated);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(commentMapper.toDto(updated));
     }
+
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
         UUID userId = authenticatedUserProvider.getCurrentUserId();
         Comment comment = commentService.getCommentById(commentId);
+
         if (!comment.getAuthorId().equals(userId)) {
-            return ResponseEntity.status(403).build();
+            throw new UnauthorizedPostActionException("You are not the owner of this comment.");
         }
+
         commentService.deleteComment(commentId);
         return ResponseEntity.noContent().build();
     }

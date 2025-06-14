@@ -1,24 +1,20 @@
 package org.main.wiredspaceapi.business.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.main.wiredspaceapi.business.CommentService;
 import org.main.wiredspaceapi.business.PostService;
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
+import org.main.wiredspaceapi.controller.exceptions.*;
 import org.main.wiredspaceapi.controller.mapper.PostMapper;
 import org.main.wiredspaceapi.controller.mapper.UserMapper;
-import org.main.wiredspaceapi.domain.Comment;
 import org.main.wiredspaceapi.domain.Post;
 import org.main.wiredspaceapi.domain.User;
-import org.main.wiredspaceapi.persistence.CommentRepository;
 import org.main.wiredspaceapi.persistence.PostRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -43,7 +39,7 @@ public class PostServiceImpl implements PostService {
 
         UUID userId = authenticatedUserProvider.getCurrentUserId();
         User author = userRepository.getUserById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
         Post post = postConverter.postCreateDtoToPost(dto);
         post.setCreatedAt(LocalDateTime.now());
@@ -52,37 +48,34 @@ public class PostServiceImpl implements PostService {
         post = postRepository.create(post);
 
         PostDTO postDto = postConverter.postToPostDto(post);
-
         return enrichWithLikes(postDto, postDto.getId());
     }
 
     @Override
     public List<PostDTO> getPostsByUserId(UUID userId) {
         List<Post> posts = postRepository.getPostsByUserId(userId);
-
         return posts.stream()
                 .map(post -> enrichWithLikes(postConverter.postToPostDto(post), post.getId()))
                 .toList();
     }
 
-
     @Override
     public PostDTO getPostById(Long id) {
         Post post = postRepository.getById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
+                .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
         return enrichWithLikes(postConverter.postToPostDto(post), id);
     }
 
     @Override
     public PostDTO updatePost(Long id, PostCreateDTO dto) {
         Post existingPost = postRepository.getById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
+                .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
 
         validatePostContent(dto.getContent());
 
         UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
         if (!existingPost.getAuthor().getId().equals(currentUserId)) {
-            throw new AccessDeniedException("You are not the owner of this post");
+            throw new UnauthorizedPostActionException("You are not the owner of this post");
         }
 
         existingPost.setContent(dto.getContent());
@@ -96,29 +89,24 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(Long id) {
         Post post = postRepository.getById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
+                .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
 
         UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
         if (!post.getAuthor().getId().equals(currentUserId)) {
-            throw new AccessDeniedException("You are not allowed to delete this post");
+            throw new UnauthorizedPostActionException("You are not allowed to delete this post");
         }
 
         postRepository.deleteAllLikesForPost(id);
-
         commentService.getCommentsByPostId(id)
                 .forEach(comment -> commentService.deleteComment(comment.getId()));
-
         postRepository.delete(post);
     }
-
-
 
     @Override
     public void likePost(Long postId, UUID userId) {
         checkPostAndUserExist(postId, userId);
 
         boolean alreadyLiked = postRepository.hasUserLikedPost(postId, userId);
-
         if (alreadyLiked) {
             postRepository.unlikePost(postId, userId);
             userStatisticsService.decrementLikes(userId);
@@ -127,36 +115,27 @@ public class PostServiceImpl implements PostService {
             userStatisticsService.incrementLikes(userId);
         }
     }
-//
-//    @Override
-//    public void unlikePost(Long postId, String userId) {
-//        UUID uuid = UUID.fromString(userId);
-//        checkPostAndUserExist(postId, uuid);
-//        postRepository.unlikePost(postId, uuid);
-//    }
 
     @Override
     public List<UserDTO> getUsersWhoLikedPost(Long postId) {
         if (!postRepository.existsById(postId)) {
-            throw new EntityNotFoundException("Post not found with id: " + postId);
+            throw new PostNotFoundException("Post not found with id: " + postId);
         }
 
         List<UUID> userIds = postRepository.getUsersWhoLikedPost(postId);
-
         return userIds.stream()
                 .map(userId -> userRepository.getUserById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId)))
+                        .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId)))
                 .map(userMapper::userToUserDTO)
                 .toList();
     }
 
-
     private void checkPostAndUserExist(Long postId, UUID userId) {
         if (!postRepository.existsById(postId)) {
-            throw new EntityNotFoundException("Post not found with id: " + postId);
+            throw new PostNotFoundException("Post not found with id: " + postId);
         }
         if (userRepository.getUserById(userId).isEmpty()) {
-            throw new EntityNotFoundException("User not found with id: " + userId);
+            throw new UserNotFoundException("User not found with id: " + userId);
         }
     }
 
@@ -167,11 +146,10 @@ public class PostServiceImpl implements PostService {
 
     private void validatePostContent(String content) {
         if (content == null || content.trim().isEmpty()) {
-            throw new IllegalArgumentException("Post content must not be empty");
+            throw new InvalidPostContentException("Post content must not be empty");
         }
         if (content.length() > 1000) {
-            throw new IllegalArgumentException("Post content exceeds 1000 characters");
+            throw new InvalidPostContentException("Post content exceeds 1000 characters");
         }
     }
-
 }

@@ -6,13 +6,13 @@ import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipRequestDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipResponseDTO;
 import org.main.wiredspaceapi.controller.dto.friendship.FriendshipStatusResponseDTO;
-import org.main.wiredspaceapi.domain.Friendship;
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedFriendshipAccessException;
+import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.controller.mapper.FriendshipMapper;
+import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -58,9 +58,9 @@ public class FriendshipController {
         List<FriendshipResponseDTO> response = friendships.stream()
                 .map(friendship -> {
                     User user = userService.getUserById(friendship.getUserId())
-                            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                            .orElseThrow(() -> new UserNotFoundException("User not found"));
                     User friend = userService.getUserById(friendship.getFriendId())
-                            .orElseThrow(() -> new IllegalArgumentException("Friend not found"));
+                            .orElseThrow(() -> new UserNotFoundException("Friend not found"));
                     return friendshipMapper.toDTO(friendship, user, friend);
                 })
                 .toList();
@@ -71,7 +71,6 @@ public class FriendshipController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFriendship(@PathVariable UUID id) {
         validateUserAccessToFriendship(id);
-
         friendshipService.deleteFriendship(id);
         return ResponseEntity.ok().build();
     }
@@ -82,7 +81,6 @@ public class FriendshipController {
             @RequestBody FriendshipRequestDTO request
     ) {
         validateUserAccessToFriendship(id);
-
         Friendship updated = friendshipService.updateFriendship(id, request.isAccepted());
         return ResponseEntity.ok(friendshipMapper.toDTO(updated));
     }
@@ -90,7 +88,6 @@ public class FriendshipController {
     @GetMapping("/status")
     public ResponseEntity<FriendshipStatusResponseDTO> getFriendshipStatus(
             @RequestParam UUID friendId) {
-
         UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
         String status = friendshipService.getFriendshipStatus(friendId);
 
@@ -102,12 +99,13 @@ public class FriendshipController {
 
         return ResponseEntity.ok(response);
     }
+
     private void validateUserAccessToFriendship(UUID friendshipId) {
         Friendship f = friendshipService.findFriendshipById(friendshipId);
         UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
 
         if (!f.getUserId().equals(currentUserId) && !f.getFriendId().equals(currentUserId)) {
-            throw new AccessDeniedException("You are not allowed to manage this friendship");
+            throw new UnauthorizedFriendshipAccessException("You are not allowed to manage this friendship");
         }
     }
 }

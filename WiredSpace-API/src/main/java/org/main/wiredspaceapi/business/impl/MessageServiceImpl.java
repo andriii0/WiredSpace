@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.business.impl;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.MessageService;
 import org.main.wiredspaceapi.controller.dto.message.MessageDTO;
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedException;
 import org.main.wiredspaceapi.domain.Message;
 import org.main.wiredspaceapi.persistence.MessageRepository;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,10 @@ public class MessageServiceImpl implements MessageService {
     public MessageDTO sendPrivateMessage(String sender, MessageDTO messageDTO) {
         String recipient = messageDTO.getTo();
 
+        if (sender.equals(recipient)) {
+            throw new UnauthorizedException("You cannot send messages to yourself.");
+        }
+
         Message message = messageMapper.toDomain(messageDTO);
         message.setFromUser(sender);
         message.setTimestamp(LocalDateTime.now());
@@ -38,7 +43,6 @@ public class MessageServiceImpl implements MessageService {
 
         return savedDTO;
     }
-
 
     @Override
     public List<Message> getMessagesBetween(String user1, String user2) {
