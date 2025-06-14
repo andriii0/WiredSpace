@@ -18,6 +18,8 @@ public class PostCommentEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Lob
+    @Column(nullable = false)
     private String content;
 
     private LocalDateTime createdAt;

@@ -11,7 +11,7 @@ public interface PostRepository {
     Post update(Post post);
     Optional<Post> getById(Long id);
     List<Post> getAll();
-    void deleteById(Long id);
+    void delete(Post post);
     boolean existsById(Long id);
 
     boolean hasUserLikedPost(Long postId, UUID userid);
@@ -25,4 +25,5 @@ public interface PostRepository {
 
     List<Post> getLikedPostsByUserId(UUID userId);
     void deleteAllLikesByUserId(UUID userId);
+    void deleteAllLikesForPost(Long postId);
 }

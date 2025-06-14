@@ -1,6 +1,7 @@
 package org.main.wiredspaceapi.persistence.impl.post;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.main.wiredspaceapi.domain.Post;
 import org.main.wiredspaceapi.persistence.PostRepository;
 import org.main.wiredspaceapi.persistence.entity.CompositeKey.PostLikeId;
@@ -10,6 +11,7 @@ import org.main.wiredspaceapi.persistence.entity.UserEntity;
 import org.main.wiredspaceapi.persistence.impl.user.UserDB;
 import org.main.wiredspaceapi.persistence.mapper.PostEntityMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
+@Transactional
 public class PostRepositoryImpl implements PostRepository {
 
     private final PostEntityMapper postEntityMapper;
@@ -50,9 +53,11 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        postDB.deleteById(id);
+    public void delete(Post post) {
+        PostEntity postEntity = postEntityMapper.toEntity(post);
+        postDB.delete(postEntity);
     }
+
 
     @Override
     public boolean existsById(Long id) {
@@ -86,11 +91,9 @@ public class PostRepositoryImpl implements PostRepository {
     }
     @Override
     public void unlikePost(Long postId, UUID userId) {
-        PostLikeId likeId = new PostLikeId(postId, userId);
-        if (postLikeDB.existsById(likeId)) {
-            postLikeDB.deleteById(likeId);
-        }
+        postLikeDB.deleteByPostIdAndUserId(postId, userId);
     }
+
 
     @Override
     public List<UUID> getUsersWhoLikedPost(Long postId) {
@@ -121,6 +124,9 @@ public class PostRepositoryImpl implements PostRepository {
                 .toList();
     }
 
+    public void deleteAllLikesForPost(Long postId){
+        postLikeDB.deleteAllLikesForPost(postId);
+    }
 
     @Override
     public List<Post> getLikedPostsByUserId(UUID userId) {

@@ -1,7 +1,10 @@
 package org.main.wiredspaceapi.business.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.main.wiredspaceapi.business.CommentService;
 import org.main.wiredspaceapi.business.PostService;
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
@@ -32,6 +35,7 @@ public class PostServiceImpl implements PostService {
     private final UserMapper userMapper;
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final UserStatisticsService userStatisticsService;
+    private final CommentService commentService;
 
     @Override
     public PostDTO createPost(PostCreateDTO dto) {
@@ -88,20 +92,26 @@ public class PostServiceImpl implements PostService {
         return enrichWithLikes(postConverter.postToPostDto(updatedPost), id);
     }
 
-
+    @Transactional
     @Override
     public void deletePost(Long id) {
         Post post = postRepository.getById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
 
         UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
-
         if (!post.getAuthor().getId().equals(currentUserId)) {
             throw new AccessDeniedException("You are not allowed to delete this post");
         }
 
-        postRepository.deleteById(post.getId());
+        postRepository.deleteAllLikesForPost(id);
+
+        commentService.getCommentsByPostId(id)
+                .forEach(comment -> commentService.deleteComment(comment.getId()));
+
+        postRepository.delete(post);
     }
+
+
 
     @Override
     public void likePost(Long postId, UUID userId) {
@@ -117,7 +127,7 @@ public class PostServiceImpl implements PostService {
             userStatisticsService.incrementLikes(userId);
         }
     }
-
+//
 //    @Override
 //    public void unlikePost(Long postId, String userId) {
 //        UUID uuid = UUID.fromString(userId);
