@@ -3,8 +3,8 @@ package org.main.wiredspaceapi.persistence.impl.post;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.main.wiredspaceapi.domain.Post;
+import org.main.wiredspaceapi.persistence.PostLikeRepository;
 import org.main.wiredspaceapi.persistence.PostRepository;
-import org.main.wiredspaceapi.persistence.entity.CompositeKey.PostLikeId;
 import org.main.wiredspaceapi.persistence.entity.PostEntity;
 import org.main.wiredspaceapi.persistence.entity.PostLikeEntity;
 import org.main.wiredspaceapi.persistence.entity.UserEntity;
@@ -20,13 +20,11 @@ import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
-@Transactional
 public class PostRepositoryImpl implements PostRepository {
 
     private final PostEntityMapper postEntityMapper;
-    private final PostLikeDB postLikeDB;
     private final PostDB postDB;
-    private final UserDB userDB;
+    private final PostLikeRepository postLikeRepository;
 
     @Override
     public Post create(Post post) {
@@ -54,10 +52,8 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public void delete(Post post) {
-        PostEntity postEntity = postEntityMapper.toEntity(post);
-        postDB.delete(postEntity);
+        postDB.deletePostById(post.getId());
     }
-
 
     @Override
     public boolean existsById(Long id) {
@@ -66,41 +62,22 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public boolean hasUserLikedPost(Long postId, UUID userId) {
-        return postLikeDB.hasUserLikedPost(postId, userId);
+        return postLikeRepository.hasUserLikedPost(postId, userId);
     }
 
     @Override
     public void likePost(Long postId, UUID userId) {
-        PostLikeId likeId = new PostLikeId(postId, userId);
-        if (postLikeDB.existsById(likeId)) return;
-
-        PostEntity post = postDB.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
-
-        UserEntity user = userDB.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        PostLikeEntity like = PostLikeEntity.builder()
-                .id(likeId)
-                .post(post)
-                .user(user)
-                .likedAt(LocalDateTime.now())
-                .build();
-
-        postLikeDB.save(like);
+        postLikeRepository.likePost(postId, userId);
     }
+
     @Override
     public void unlikePost(Long postId, UUID userId) {
-        postLikeDB.deleteByPostIdAndUserId(postId, userId);
+        postLikeRepository.unlikePost(postId, userId);
     }
-
 
     @Override
     public List<UUID> getUsersWhoLikedPost(Long postId) {
-        return postLikeDB.findAllByPostId(postId)
-                .stream()
-                .map(like -> like.getUser().getId())
-                .toList();
+        return postLikeRepository.getUsersWhoLikedPost(postId);
     }
 
     @Override
@@ -124,13 +101,14 @@ public class PostRepositoryImpl implements PostRepository {
                 .toList();
     }
 
-    public void deleteAllLikesForPost(Long postId){
-        postLikeDB.deleteAllLikesForPost(postId);
+    @Override
+    public void deleteAllLikesForPost(Long postId) {
+        postLikeRepository.deleteAllLikesForPost(postId);
     }
 
     @Override
     public List<Post> getLikedPostsByUserId(UUID userId) {
-        return postLikeDB.findAllByUser_Id(userId)
+        return postLikeRepository.getLikedPostEntitiesByUserId(userId)
                 .stream()
                 .map(PostLikeEntity::getPost)
                 .map(postEntityMapper::toDomain)
@@ -139,7 +117,6 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public void deleteAllLikesByUserId(UUID userId) {
-        postLikeDB.deleteAllByUser_Id(userId);
+        postLikeRepository.deleteAllLikesByUserId(userId);
     }
-
 }

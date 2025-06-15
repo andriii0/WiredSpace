@@ -2,12 +2,13 @@ package org.main.wiredspaceapi.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.main.wiredspaceapi.persistence.entity.CompositeKey.PostLikeId;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "post_likes")
+@Table(name = "post_likes", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"post_id", "user_id"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,17 +16,16 @@ import java.time.LocalDateTime;
 @Builder
 public class PostLikeEntity {
 
-    @EmbeddedId
-    private PostLikeId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("postId")
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private PostEntity post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     private LocalDateTime likedAt;

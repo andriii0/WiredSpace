@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.business.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.CommentService;
+import org.main.wiredspaceapi.business.PostLikeService;
 import org.main.wiredspaceapi.business.PostService;
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
@@ -32,6 +33,7 @@ public class PostServiceImpl implements PostService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final UserStatisticsService userStatisticsService;
     private final CommentService commentService;
+    private final PostLikeService postLikeService;
 
     @Override
     public PostDTO createPost(PostCreateDTO dto) {
@@ -85,7 +87,6 @@ public class PostServiceImpl implements PostService {
         return enrichWithLikes(postConverter.postToPostDto(updatedPost), id);
     }
 
-    @Transactional
     @Override
     public void deletePost(Long id) {
         Post post = postRepository.getById(id)
@@ -104,39 +105,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void likePost(Long postId, UUID userId) {
-        checkPostAndUserExist(postId, userId);
-
-        boolean alreadyLiked = postRepository.hasUserLikedPost(postId, userId);
-        if (alreadyLiked) {
-            postRepository.unlikePost(postId, userId);
-            userStatisticsService.decrementLikes(userId);
-        } else {
-            postRepository.likePost(postId, userId);
-            userStatisticsService.incrementLikes(userId);
-        }
+        postLikeService.likeOrUnlikePost(postId, userId);
     }
 
     @Override
     public List<UserDTO> getUsersWhoLikedPost(Long postId) {
-        if (!postRepository.existsById(postId)) {
-            throw new PostNotFoundException("Post not found with id: " + postId);
-        }
-
-        List<UUID> userIds = postRepository.getUsersWhoLikedPost(postId);
-        return userIds.stream()
-                .map(userId -> userRepository.getUserById(userId)
-                        .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId)))
-                .map(userMapper::userToUserDTO)
-                .toList();
-    }
-
-    private void checkPostAndUserExist(Long postId, UUID userId) {
-        if (!postRepository.existsById(postId)) {
-            throw new PostNotFoundException("Post not found with id: " + postId);
-        }
-        if (userRepository.getUserById(userId).isEmpty()) {
-            throw new UserNotFoundException("User not found with id: " + userId);
-        }
+        return postLikeService.getUsersWhoLikedPost(postId);
     }
 
     private PostDTO enrichWithLikes(PostDTO dto, Long postId) {
