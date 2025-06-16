@@ -84,9 +84,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> searchUsers(String query, int offset, int limit) {
+        if (offset < 0) {
+            throw new IllegalArgumentException("Offset must be non-negative");
+        }
+        if (limit <= 0) {
+            throw new IllegalArgumentException("Limit must be greater than zero");
+        }
+
+        if (offset % limit != 0) {
+            throw new IllegalArgumentException("Offset must be a multiple of limit for proper pagination");
+        }
+
         UUID currentUserId = userProvider.getCurrentUserId();
         return userRepository.searchUsers(query, offset, limit, currentUserId);
     }
+
 
 
     @Override
