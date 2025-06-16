@@ -117,4 +117,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleReportNotFound(ReportNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    @ExceptionHandler(PostAlreadyReportedExcepion.class)
+    public ResponseEntity<Map<String, String>> handleReportNotFound(PostAlreadyReportedExcepion ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 }

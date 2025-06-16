@@ -28,9 +28,9 @@ public class ReportController {
 
     @PostMapping("/{postId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> reportPost(@PathVariable Long postId) {
+    public ResponseEntity<Void> reportPost(@PathVariable Long postId, @RequestBody ReportDTO reportDTO) {
         UUID reporterId = authenticatedUserProvider.getCurrentUserId();
-        reportService.reportPost(postId, reporterId);
+        reportService.reportPost(postId, reporterId, reportDTO.getReason());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

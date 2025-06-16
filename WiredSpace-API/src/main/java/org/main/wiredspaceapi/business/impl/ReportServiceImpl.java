@@ -2,6 +2,7 @@ package org.main.wiredspaceapi.business.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.ReportService;
+import org.main.wiredspaceapi.controller.exceptions.PostAlreadyReportedExcepion;
 import org.main.wiredspaceapi.controller.exceptions.PostNotFoundException;
 import org.main.wiredspaceapi.controller.exceptions.ReportNotFoundException;
 import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
@@ -28,7 +29,7 @@ public class ReportServiceImpl implements ReportService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
 
     @Override
-    public void reportPost(Long postId, UUID reporterId) {
+    public void reportPost(Long postId, UUID reporterId, String reason) {
         Post post = postRepository.getById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + postId));
 
@@ -36,12 +37,13 @@ public class ReportServiceImpl implements ReportService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + reporterId));
 
         if (reportRepository.alreadyReported(reporterId, postId)) {
-            return;
+            throw new PostAlreadyReportedExcepion("You have already reported this post");
         }
 
         Report report = Report.builder()
                 .postId(postId)
                 .reporterId(reporterId)
+                .reason(reason)
                 .reportedAt(LocalDateTime.now())
                 .build();
 
