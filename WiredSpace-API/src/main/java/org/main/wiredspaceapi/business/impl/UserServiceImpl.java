@@ -40,7 +40,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> getUserById(UUID id) {
-        return userRepository.getUserById(id);
+        return userRepository.getUserById(id)
+                .or(() -> {
+                    throw new UserNotFoundException("User with ID " + id + " not found");
+                });
     }
 
     @Override
@@ -68,8 +71,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(UUID id) {
-        userProvider.validateCurrentUserAccess(id);
+        if (!userRepository.getUserById(id).isPresent()) {
+            throw new UserNotFoundException("User with ID " + id + " not found");
+        }
 
+        userProvider.validateCurrentUserAccess(id);
         userDeletionService.deleteUserCompletely(id);
     }
 
