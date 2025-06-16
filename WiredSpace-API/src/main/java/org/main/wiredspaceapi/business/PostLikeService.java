@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface PostLikeService {
     void likeOrUnlikePost(Long postId, UUID userId);
     List<UserDTO> getUsersWhoLikedPost(Long postId);
+    void deleteAllLikesForPost(Long postId);
 }

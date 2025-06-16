@@ -53,6 +53,11 @@ public class PostLikeServiceImpl implements PostLikeService {
                 .toList();
     }
 
+    @Override
+    public void deleteAllLikesForPost(Long postId) {
+        postLikeRepository.deleteAllLikesForPost(postId);
+    }
+
     private void checkPostAndUserExist(Long postId, UUID userId) {
         if (!postRepository.existsById(postId)) {
             throw new PostNotFoundException("Post not found with id: " + postId);

@@ -24,7 +24,6 @@ public class PostRepositoryImpl implements PostRepository {
 
     private final PostEntityMapper postEntityMapper;
     private final PostDB postDB;
-    private final PostLikeRepository postLikeRepository;
 
     @Override
     public Post create(Post post) {
@@ -79,10 +78,5 @@ public class PostRepositoryImpl implements PostRepository {
                 .stream()
                 .map(postEntityMapper::toDomain)
                 .toList();
-    }
-
-    @Override
-    public void deleteAllLikesForPost(Long postId) {
-        postLikeRepository.deleteAllLikesForPost(postId);
     }
 }

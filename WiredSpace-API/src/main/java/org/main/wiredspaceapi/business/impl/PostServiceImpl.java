@@ -81,7 +81,6 @@ public class PostServiceImpl implements PostService {
         }
 
         existingPost.setContent(dto.getContent());
-        existingPost.setCreatedAt(LocalDateTime.now());
 
         Post updatedPost = postRepository.update(existingPost);
         return enrichWithLikes(postConverter.postToPostDto(updatedPost), id);
@@ -97,7 +96,7 @@ public class PostServiceImpl implements PostService {
             throw new UnauthorizedPostActionException("You are not allowed to delete this post");
         }
 
-        postRepository.deleteAllLikesForPost(id);
+        postLikeService.deleteAllLikesForPost(id);
         commentService.getCommentsByPostId(id)
                 .forEach(comment -> commentService.deleteComment(comment.getId()));
         postRepository.delete(post);

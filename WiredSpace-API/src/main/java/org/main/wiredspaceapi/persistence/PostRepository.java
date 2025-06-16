@@ -18,6 +18,4 @@ public interface PostRepository {
     List<Post> getAllByUserId(UUID userId);
     void deleteAllByUserId(UUID userId);
     List<Post> getPostsByUserId(UUID userId);
-
-    void deleteAllLikesForPost(Long postId);
 }
