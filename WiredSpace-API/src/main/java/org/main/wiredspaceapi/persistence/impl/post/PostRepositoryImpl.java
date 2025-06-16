@@ -61,26 +61,6 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public boolean hasUserLikedPost(Long postId, UUID userId) {
-        return postLikeRepository.hasUserLikedPost(postId, userId);
-    }
-
-    @Override
-    public void likePost(Long postId, UUID userId) {
-        postLikeRepository.likePost(postId, userId);
-    }
-
-    @Override
-    public void unlikePost(Long postId, UUID userId) {
-        postLikeRepository.unlikePost(postId, userId);
-    }
-
-    @Override
-    public List<UUID> getUsersWhoLikedPost(Long postId) {
-        return postLikeRepository.getUsersWhoLikedPost(postId);
-    }
-
-    @Override
     public List<Post> getAllByUserId(UUID userId) {
         return postDB.findAllByAuthor_Id(userId)
                 .stream()
@@ -104,19 +84,5 @@ public class PostRepositoryImpl implements PostRepository {
     @Override
     public void deleteAllLikesForPost(Long postId) {
         postLikeRepository.deleteAllLikesForPost(postId);
-    }
-
-    @Override
-    public List<Post> getLikedPostsByUserId(UUID userId) {
-        return postLikeRepository.getLikedPostEntitiesByUserId(userId)
-                .stream()
-                .map(PostLikeEntity::getPost)
-                .map(postEntityMapper::toDomain)
-                .toList();
-    }
-
-    @Override
-    public void deleteAllLikesByUserId(UUID userId) {
-        postLikeRepository.deleteAllLikesByUserId(userId);
     }
 }

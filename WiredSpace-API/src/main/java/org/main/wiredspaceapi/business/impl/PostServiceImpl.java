@@ -114,7 +114,11 @@ public class PostServiceImpl implements PostService {
     }
 
     private PostDTO enrichWithLikes(PostDTO dto, Long postId) {
-        dto.setLikedByUserIds(postRepository.getUsersWhoLikedPost(postId));
+        List<UUID> likedUserIds = postLikeService.getUsersWhoLikedPost(postId).stream()
+                .map(UserDTO::getId)
+                .toList();
+
+        dto.setLikedByUserIds(likedUserIds);
         return dto;
     }
 

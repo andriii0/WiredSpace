@@ -14,16 +14,10 @@ public interface PostRepository {
     void delete(Post post);
     boolean existsById(Long id);
 
-    boolean hasUserLikedPost(Long postId, UUID userid);
-    void likePost(Long postId, UUID userId);
-    void unlikePost(Long postId, UUID userId);
-    List<UUID> getUsersWhoLikedPost(Long postId);
 
     List<Post> getAllByUserId(UUID userId);
     void deleteAllByUserId(UUID userId);
     List<Post> getPostsByUserId(UUID userId);
 
-    List<Post> getLikedPostsByUserId(UUID userId);
-    void deleteAllLikesByUserId(UUID userId);
     void deleteAllLikesForPost(Long postId);
 }

@@ -6,8 +6,10 @@ import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 import org.main.wiredspaceapi.controller.exceptions.PostNotFoundException;
 import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.controller.mapper.UserMapper;
+import org.main.wiredspaceapi.persistence.PostLikeRepository;
 import org.main.wiredspaceapi.persistence.PostRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.main.wiredspaceapi.persistence.impl.post.PostLikeRepositoryImpl;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.stereotype.Service;
 
@@ -21,18 +23,19 @@ public class PostLikeServiceImpl implements PostLikeService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserStatisticsService userStatisticsService;
+    private final PostLikeRepository postLikeRepository;
     private final PostRepository postRepository;
 
     @Override
     public void likeOrUnlikePost(Long postId, UUID userId) {
         checkPostAndUserExist(postId, userId);
 
-        boolean alreadyLiked = postRepository.hasUserLikedPost(postId, userId);
+        boolean alreadyLiked = postLikeRepository.hasUserLikedPost(postId, userId);
         if (alreadyLiked) {
-            postRepository.unlikePost(postId, userId);
+            postLikeRepository.unlikePost(postId, userId);
             userStatisticsService.decrementLikes(userId);
         } else {
-            postRepository.likePost(postId, userId);
+            postLikeRepository.likePost(postId, userId);
             userStatisticsService.incrementLikes(userId);
         }
     }
@@ -43,7 +46,7 @@ public class PostLikeServiceImpl implements PostLikeService {
             throw new PostNotFoundException("Post not found with id: " + postId);
         }
 
-        return postRepository.getUsersWhoLikedPost(postId).stream()
+        return postLikeRepository.getUsersWhoLikedPost(postId).stream()
                 .map(id -> userRepository.getUserById(id)
                         .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id)))
                 .map(userMapper::userToUserDTO)
