@@ -84,7 +84,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> searchUsers(String query, int offset, int limit) {
-        return userRepository.searchUsers(query, offset, limit);
+        List<User> users = userRepository.searchUsers(query, offset, limit);
+        return users.
     }
 
     @Override

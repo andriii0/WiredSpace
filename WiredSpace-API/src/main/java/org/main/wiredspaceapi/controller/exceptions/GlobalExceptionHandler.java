@@ -113,4 +113,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUnauthorized(UnauthorizedException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
+    @ExceptionHandler(ReportNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleReportNotFound(ReportNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }
