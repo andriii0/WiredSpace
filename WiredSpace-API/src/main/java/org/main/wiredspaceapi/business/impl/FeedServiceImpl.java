@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.business.impl;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.FeedService;
 import org.main.wiredspaceapi.business.PostLikeService;
+import org.main.wiredspaceapi.business.PostService;
 import org.main.wiredspaceapi.controller.exceptions.NoMorePostsAvailableException;
 import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.domain.Post;
@@ -18,9 +19,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FeedServiceImpl implements FeedService {
 
-    private final PostRepository postRepository;
     private final FriendshipRepository friendshipRepository;
     private final PostLikeService postLikeService;
+    private final PostService postService;
 
     @Override
     public List<Post> getSmartFeed(UUID currentUserId, int page, int size) {
@@ -32,7 +33,7 @@ public class FeedServiceImpl implements FeedService {
         while (result.size() < (page + 1) * size && daysBack <= 30) {
             LocalDateTime from = now.minusDays(daysBack).toLocalDate().atStartOfDay();
             LocalDateTime to = now.minusDays(daysBack - 1).toLocalDate().atStartOfDay();
-            result.addAll(getUnlikedFriendPosts(friendIds, currentUserId, from, to));
+            result.addAll(getUnlikedFriendPosts(friendIds, currentUserId, from, to, size * 2));
             daysBack++;
         }
 
@@ -44,7 +45,7 @@ public class FeedServiceImpl implements FeedService {
             while (result.size() < (page + 1) * size && daysBack <= 30) {
                 LocalDateTime from = now.minusDays(daysBack).toLocalDate().atStartOfDay();
                 LocalDateTime to = now.minusDays(daysBack - 1).toLocalDate().atStartOfDay();
-                result.addAll(getUnlikedSuggestedPosts(currentUserId, excludedUserIds, from, to, size * 2));
+                result.addAll(getUnlikedSuggestedPosts(currentUserId, excludedUserIds, from, to, size * 2));  // Лимит добавлен
                 daysBack++;
             }
         }
@@ -67,8 +68,8 @@ public class FeedServiceImpl implements FeedService {
                 .toList();
     }
 
-    private List<Post> getUnlikedFriendPosts(List<UUID> friendIds, UUID currentUserId, LocalDateTime from, LocalDateTime to) {
-        List<Post> posts = postRepository.findPostsByAuthorIdsAndDate(friendIds, from, to);
+    private List<Post> getUnlikedFriendPosts(List<UUID> friendIds, UUID currentUserId, LocalDateTime from, LocalDateTime to, int limit) {
+        List<Post> posts = postService.findPostsByAuthorIdsAndDate(friendIds, from, to, limit);
 
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
@@ -79,11 +80,11 @@ public class FeedServiceImpl implements FeedService {
         return posts.stream()
                 .filter(post -> !likedPostIds.contains(post.getId()))
                 .toList();
-
     }
 
     private List<Post> getUnlikedSuggestedPosts(UUID currentUserId, List<UUID> excludedUserIds, LocalDateTime from, LocalDateTime to, int limit) {
-        List<Post> posts = postRepository.findRandomPostsExcludingUsers(excludedUserIds, currentUserId, from, to, limit);
+        List<Post> posts = postService.findRandomPostsExcludingUsers(excludedUserIds, currentUserId, from, to, limit);
+
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
                 .toList();
@@ -93,6 +94,5 @@ public class FeedServiceImpl implements FeedService {
         return posts.stream()
                 .filter(post -> !likedPostIds.contains(post.getId()))
                 .toList();
-
     }
 }

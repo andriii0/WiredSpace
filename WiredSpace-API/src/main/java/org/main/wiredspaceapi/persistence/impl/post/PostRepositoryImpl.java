@@ -81,8 +81,9 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to) {
-        return postDB.findPostsByAuthorIdsAndDate(authorIds, from, to).stream()
+    public List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to, int limit) {
+        return postDB.findPostsByAuthorIdsAndDate(authorIds, from, to, org.springframework.data.domain.PageRequest.of(0, limit))
+                .stream()
                 .map(postEntityMapper::toDomain)
                 .toList();
     }

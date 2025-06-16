@@ -131,8 +131,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to) {
-        return postRepository.findPostsByAuthorIdsAndDate(authorIds, from, to);
+    public List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to, int limit) {
+        return postRepository.findPostsByAuthorIdsAndDate(authorIds, from, to, limit);
     }
 
     @Override

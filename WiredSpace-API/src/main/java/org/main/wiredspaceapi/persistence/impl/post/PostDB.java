@@ -33,7 +33,8 @@ public interface PostDB extends JpaRepository<PostEntity, Long> {
     List<PostEntity> findPostsByAuthorIdsAndDate(
             @Param("authorIds") List<UUID> authorIds,
             @Param("from") LocalDateTime from,
-            @Param("to") LocalDateTime to
+            @Param("to") LocalDateTime to,
+            org.springframework.data.domain.Pageable pageable
     );
 
     @Query(value = """

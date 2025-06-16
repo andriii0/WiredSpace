@@ -16,7 +16,7 @@ public interface PostService {
     PostDTO updatePost(Long id, PostCreateDTO dto);
     void deletePost(Long id);
 
-    List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to);
+    List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to, int limit);
     List<Post> findRandomPostsExcludingUsers(List<UUID> excludedUserIds, UUID currentUserId, LocalDateTime from, LocalDateTime to, int limit);
 
     //like part

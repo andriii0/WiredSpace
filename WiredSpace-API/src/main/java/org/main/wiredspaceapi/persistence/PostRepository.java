@@ -20,6 +20,6 @@ public interface PostRepository {
     void deleteAllByUserId(UUID userId);
     List<Post> getPostsByUserId(UUID userId);
 
-    List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to);
+    List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to, int limit);
     List<Post> findRandomPostsExcludingUsers(List<UUID> excludedUserIds, UUID currentUserId, LocalDateTime from, LocalDateTime to, int limit);
 }
