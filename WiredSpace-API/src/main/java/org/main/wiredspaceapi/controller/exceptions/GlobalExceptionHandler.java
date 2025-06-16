@@ -121,4 +121,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleReportNotFound(PostAlreadyReportedExcepion ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
+    @ExceptionHandler(NoMorePostsAvailableException.class)
+    public ResponseEntity<Map<String, String>> handleNoMorePostsAvailable(NoMorePostsAvailableException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 }

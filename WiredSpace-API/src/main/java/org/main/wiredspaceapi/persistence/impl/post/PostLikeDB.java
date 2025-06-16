@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface PostLikeDB extends JpaRepository<PostLikeEntity, Long> {
@@ -32,4 +33,7 @@ public interface PostLikeDB extends JpaRepository<PostLikeEntity, Long> {
 
     @Query("SELECT COUNT(pl) > 0 FROM PostLikeEntity pl WHERE pl.post.id = :postId AND pl.user.id = :userId")
     boolean hasUserLikedPost(@Param("postId") Long postId, @Param("userId") UUID userId);
+
+    @Query("SELECT pl.post.id FROM PostLikeEntity pl WHERE pl.user.id = :userId AND pl.post.id IN :postIds")
+    Set<Long> findLikedPostIds(@Param("userId") UUID userId, @Param("postIds") List<Long> postIds);
 }

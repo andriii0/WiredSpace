@@ -79,4 +79,19 @@ public class PostRepositoryImpl implements PostRepository {
                 .map(postEntityMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to) {
+        return postDB.findPostsByAuthorIdsAndDate(authorIds, from, to).stream()
+                .map(postEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Post> findRandomPostsExcludingUsers(List<UUID> excludedUserIds, UUID currentUserId, LocalDateTime from, LocalDateTime to, int limit) {
+        return postDB.findRandomPostsExcludingUsers(excludedUserIds, currentUserId, from, to, limit).stream()
+                .map(postEntityMapper::toDomain)
+                .toList();
+    }
+
 }

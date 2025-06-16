@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -70,4 +71,10 @@ public class PostLikeRepositoryImpl implements PostLikeRepository {
     public void deleteAllLikesByUserId(UUID userId) {
         postLikeDB.deleteAllByUser_Id(userId);
     }
+
+    @Override
+    public Set<Long> findLikedPostIds(UUID userId, List<Long> postIds){
+        return postLikeDB.findLikedPostIds(userId, postIds);
+    }
+
 }

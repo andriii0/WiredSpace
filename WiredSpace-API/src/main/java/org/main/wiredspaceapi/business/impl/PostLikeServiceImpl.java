@@ -14,6 +14,7 @@ import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class PostLikeServiceImpl implements PostLikeService {
     public void likeOrUnlikePost(Long postId, UUID userId) {
         checkPostAndUserExist(postId, userId);
 
-        boolean alreadyLiked = postLikeRepository.hasUserLikedPost(postId, userId);
+        boolean alreadyLiked = hasUserLikedPost(postId, userId);
         if (alreadyLiked) {
             postLikeRepository.unlikePost(postId, userId);
             userStatisticsService.decrementLikes(userId);
@@ -65,5 +66,15 @@ public class PostLikeServiceImpl implements PostLikeService {
         if (userRepository.getUserById(userId).isEmpty()) {
             throw new UserNotFoundException("User not found with id: " + userId);
         }
+    }
+
+    @Override
+    public boolean hasUserLikedPost(Long postId, UUID userid){
+        return postLikeRepository.hasUserLikedPost(postId, userid);
+    }
+
+    @Override
+    public Set<Long> findLikedPostIds(UUID userId, List<Long> postIds){
+        return postLikeRepository.findLikedPostIds(userId, postIds);
     }
 }

@@ -129,4 +129,14 @@ public class PostServiceImpl implements PostService {
             throw new InvalidPostContentException("Post content exceeds 1000 characters");
         }
     }
+
+    @Override
+    public List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to) {
+        return postRepository.findPostsByAuthorIdsAndDate(authorIds, from, to);
+    }
+
+    @Override
+    public List<Post> findRandomPostsExcludingUsers(List<UUID> excludedUserIds, UUID currentUserId, LocalDateTime from, LocalDateTime to, int limit) {
+        return postRepository.findRandomPostsExcludingUsers(excludedUserIds, currentUserId, from, to, limit);
+    }
 }

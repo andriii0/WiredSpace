@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.persistence;
 import org.main.wiredspaceapi.persistence.entity.PostLikeEntity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface PostLikeRepository {
@@ -19,4 +20,6 @@ public interface PostLikeRepository {
     void deleteAllLikesForPost(Long postId);
 
     void deleteAllLikesByUserId(UUID userId);
+
+    Set<Long> findLikedPostIds(UUID userId, List<Long> postIds);
 }
