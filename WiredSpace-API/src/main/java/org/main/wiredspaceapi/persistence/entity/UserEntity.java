@@ -35,6 +35,7 @@ public class UserEntity extends AccountEntity {
         return likedPosts == null ? 0 : likedPosts.size();
     }
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "reporter", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ReportEntity> reports = new HashSet<>();
+
 }
