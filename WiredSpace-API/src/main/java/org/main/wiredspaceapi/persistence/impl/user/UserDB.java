@@ -17,10 +17,13 @@ public interface UserDB extends JpaRepository<UserEntity, UUID> {
 
     @Query("""
     SELECT u FROM UserEntity u
-    WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%'))
-       OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))
+    WHERE (LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%'))
+       OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))
+      AND u.id <> :currentUserId
 """)
-    List<UserEntity> searchByNameOrEmail(@Param("query") String query, Pageable pageable);
+    List<UserEntity> searchByNameOrEmail(@Param("query") String query,
+                                         @Param("currentUserId") UUID currentUserId,
+                                         Pageable pageable);
 
     @Query("""
     SELECT COUNT(u) FROM UserEntity u

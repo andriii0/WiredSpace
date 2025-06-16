@@ -84,9 +84,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> searchUsers(String query, int offset, int limit) {
-        List<User> users = userRepository.searchUsers(query, offset, limit);
-        return users.
+        UUID currentUserId = userProvider.getCurrentUserId();
+        return userRepository.searchUsers(query, offset, limit, currentUserId);
     }
+
 
     @Override
     public long countSearchUsers(String query) {

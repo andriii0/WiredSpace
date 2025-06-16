@@ -87,9 +87,9 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> searchUsers(String query, int offset, int limit) {
-        Pageable pageable = PageRequest.of(offset / limit, limit); // page = offset / limit
-        List<UserEntity> entities = userDB.searchByNameOrEmail(query, pageable);
+    public List<User> searchUsers(String query, int offset, int limit, UUID currentUserId) {
+        Pageable pageable = PageRequest.of(offset / limit, limit);
+        List<UserEntity> entities = userDB.searchByNameOrEmail(query, currentUserId, pageable);
         return entities.stream()
                 .map(accountMapper::toDomain)
                 .toList();

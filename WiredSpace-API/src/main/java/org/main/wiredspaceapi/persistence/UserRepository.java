@@ -18,6 +18,6 @@ public interface UserRepository {
     void updateStatistics(User user);
 
     //pagination
-    List<User> searchUsers(String query, int offset, int limit);
+    List<User> searchUsers(String query, int offset, int limit, UUID currentUserId);
     long countSearchUsers(String query);
 }
