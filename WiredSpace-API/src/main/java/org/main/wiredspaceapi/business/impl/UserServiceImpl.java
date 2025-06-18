@@ -90,6 +90,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUserById(UUID userId) {
+        User user = getUserById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
+
+        userProvider.validateCurrentUserAccess(userId);
+        userDeletionService.deleteUserCompletely(user.getId());
+    }
+
+    @Override
     public List<User> searchUsers(String query, int offset, int limit) {
         if (offset < 0) {
             throw new IllegalArgumentException("Offset must be non-negative");

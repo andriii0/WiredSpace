@@ -14,6 +14,7 @@ public interface UserService {
     List<User> getAllUsers();
     Optional<User> updateUserById(UUID userId, String newName, String newEmail, String newPassword);
     void deleteUserByEmail(String email);
+    void deleteUserById(UUID userId);
 
     List<User> searchUsers(String query, int offset, int limit);
     long countSearchUsers(String query);
