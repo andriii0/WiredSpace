@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
@@ -51,17 +52,22 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_SUPPORT')")
     @GetMapping("/user/{id}")
     public ResponseEntity<User> getUserById(@PathVariable UUID id) {
-        User user = adminService.getUserById(id)
-                .orElseThrow(() -> new RuntimeException("User retrieval failed unexpectedly."));
+        //to be redone
         return ResponseEntity.ok(user);
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_SUPPORT')")
     @GetMapping("/user/email")
     public ResponseEntity<User> getUserByEmail(@RequestParam String email) {
-        User user = adminService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User retrieval by email failed unexpectedly."));
+        //to be redone
         return ResponseEntity.ok(user);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @DeleteMapping("/user/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+        //to be redone
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -71,10 +77,4 @@ public class AdminController {
         return ResponseEntity.ok(stats);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @DeleteMapping("/user/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        adminService.deleteUser(id);
-        return ResponseEntity.ok().build();
-    }
 }

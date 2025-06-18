@@ -12,6 +12,7 @@ import org.main.wiredspaceapi.persistence.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,9 +23,24 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
 
-    // CRUD Part
     public Admin createAdmin(String name, String email, String password, AdminRole role) {
         return adminRepository.createAdmin(name, email, password, role);
+    }
+
+    public Optional<Admin> getAdminById(UUID id) {
+        return adminRepository.findAdminById(id);
+    }
+
+    public List<Admin> getAllAdmins() {
+        return adminRepository.getAllAdmins();
+    }
+
+    public Admin updateAdmin(Admin admin) {
+        return adminRepository.updateAdmin(admin);
+    }
+
+    public void deleteAdmin(UUID id) {
+        adminRepository.deleteAdmin(id);
     }
 
     public Optional<Admin> promoteUserToAdmin(UUID userId, AdminRole adminRole) {
@@ -35,7 +51,6 @@ public class AdminServiceImpl implements AdminService {
 
         User user = userOpt.get();
 
-        // Optional: check if user is already admin
         if (adminRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new UserPromotionException("User is already an admin.");
         }
@@ -50,7 +65,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public Optional<User> demoteAdminToUser(UUID adminId, UserRole userRole) {
-        Optional<Admin> adminOpt = adminRepository.getAdminById(adminId);
+        Optional<Admin> adminOpt = adminRepository.findAdminById(adminId);
         if (adminOpt.isEmpty()) {
             throw new AdminNotFoundException("Admin with ID " + adminId + " not found.");
         }
@@ -66,34 +81,8 @@ public class AdminServiceImpl implements AdminService {
         ));
     }
 
+    // Find Admin by Email
     public Optional<Admin> findAdminByEmail(String email) {
         return adminRepository.findByEmail(email);
-    }
-
-    @Override
-    public Optional<User> getUserById(UUID id) {
-        return userRepository.getUserById(id)
-                .or(() -> {
-                    throw new UserNotFoundException("User with ID " + id + " not found.");
-                });
-    }
-
-    @Override
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .or(() -> {
-                    throw new UserNotFoundException("User with email " + email + " not found.");
-                });
-    }
-
-    @Override
-    public boolean deleteUser(UUID uuid) {
-        Optional<User> user = userRepository.getUserById(uuid);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("User with ID " + uuid + " not found.");
-        }
-
-        userRepository.deleteUser(uuid);
-        return true;
     }
 }

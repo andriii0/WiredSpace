@@ -2,10 +2,7 @@ package org.main.wiredspaceapi.business.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.ReportService;
-import org.main.wiredspaceapi.controller.exceptions.PostAlreadyReportedExcepion;
-import org.main.wiredspaceapi.controller.exceptions.PostNotFoundException;
-import org.main.wiredspaceapi.controller.exceptions.ReportNotFoundException;
-import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
+import org.main.wiredspaceapi.controller.exceptions.*;
 import org.main.wiredspaceapi.domain.Post;
 import org.main.wiredspaceapi.domain.Report;
 import org.main.wiredspaceapi.domain.User;
@@ -52,11 +49,17 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Report> getAllReports(int offset, int limit) {
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only admins can view all reports.");
+        }
         return reportRepository.findAll(offset, limit);
     }
 
     @Override
     public void deleteReport(Long reportId) {
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only admins can delete reports.");
+        }
         if (!reportRepository.existsById(reportId)) {
             throw new ReportNotFoundException("Report not found with id: " + reportId);
         }
@@ -65,16 +68,26 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Report> getAllReportsForPost(Long postId) {
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only admins can view reports for posts.");
+        }
         return reportRepository.getAllReportsForPost(postId);
     }
 
     @Override
     public void deleteAllByReporter(UUID reporterId) {
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only admins can delete reports by reporter.");
+        }
         reportRepository.deleteAllByReporter(reporterId);
     }
 
     @Override
     public void deleteAllByPost(Long postId) {
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only admins can delete reports for a post.");
+        }
         reportRepository.deleteAllByPost(postId);
     }
+
 }

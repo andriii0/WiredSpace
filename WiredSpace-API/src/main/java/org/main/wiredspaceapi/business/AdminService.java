@@ -15,10 +15,4 @@ public interface AdminService {
     Optional<Admin> promoteUserToAdmin(UUID userId, AdminRole adminRole);
     Optional<User> demoteAdminToUser(UUID adminId, UserRole userRole);
     Optional<Admin> findAdminByEmail(String email);
-
-
-    //Service Part
-    Optional<User> getUserById(UUID id);
-    Optional<User> getUserByEmail(String email);
-    boolean deleteUser(UUID uuid);
 }

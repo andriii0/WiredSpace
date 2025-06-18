@@ -28,7 +28,8 @@ public class AuthenticatedUserProvider {
 
     public void validateCurrentUserAccess(String targetEmail) {
         String currentEmail = getCurrentUserEmail();
-        if (!currentEmail.equals(targetEmail)) {
+
+        if (!currentEmail.equals(targetEmail) && !hasAdminRole()) {
             throw new UnauthorizedException("Access denied: not your account.");
         }
     }
@@ -41,13 +42,19 @@ public class AuthenticatedUserProvider {
         }
     }
 
-    public boolean hasAdminRole() {
+    public boolean hasRole(String role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null &&
                 authentication.getAuthorities().stream()
                         .anyMatch(grantedAuthority ->
-                                grantedAuthority.getAuthority().equals("ROLE_ADMIN")
-                                        || grantedAuthority.getAuthority().equals("ROLE_SUPPORT")
+                                grantedAuthority.getAuthority().equals(role)
                         );
     }
+    public boolean hasAdminRole() {
+        return hasRole("ROLE_ADMIN");
+    }
+    public boolean hasSupportRole() {
+        return hasRole("ROLE_SUPPORT");
+    }
+
 }

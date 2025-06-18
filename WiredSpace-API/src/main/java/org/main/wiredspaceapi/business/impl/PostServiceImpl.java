@@ -74,11 +74,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
 
         validatePostContent(dto.getContent());
-
-        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
-        if (!existingPost.getAuthor().getId().equals(currentUserId)) {
-            throw new UnauthorizedPostActionException("You are not the owner of this post");
-        }
+        validatePostOwnershipOrAdmin(existingPost);
 
         existingPost.setContent(dto.getContent());
 
@@ -91,10 +87,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.getById(id)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
 
-        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
-        if (!post.getAuthor().getId().equals(currentUserId)) {
-            throw new UnauthorizedPostActionException("You are not allowed to delete this post");
-        }
+        validatePostOwnershipOrAdmin(post);
 
         postLikeService.deleteAllLikesForPost(id);
         commentService.getCommentsByPostId(id)
@@ -121,14 +114,6 @@ public class PostServiceImpl implements PostService {
         return dto;
     }
 
-    private void validatePostContent(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            throw new InvalidPostContentException("Post content must not be empty");
-        }
-        if (content.length() > 1000) {
-            throw new InvalidPostContentException("Post content exceeds 1000 characters");
-        }
-    }
 
     @Override
     public List<Post> findPostsByAuthorIdsAndDate(List<UUID> authorIds, LocalDateTime from, LocalDateTime to, int limit) {
@@ -138,5 +123,24 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> findRandomPostsExcludingUsers(List<UUID> excludedUserIds, UUID currentUserId, LocalDateTime from, LocalDateTime to, int limit) {
         return postRepository.findRandomPostsExcludingUsers(excludedUserIds, currentUserId, from, to, limit);
+    }
+
+    private void validatePostContent(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new InvalidPostContentException("Post content must not be empty");
+        }
+        if (content.length() > 1000) {
+            throw new InvalidPostContentException("Post content exceeds 1000 characters");
+        }
+    }
+
+    private void validatePostOwnershipOrAdmin(Post post) {
+        UUID currentUserId = authenticatedUserProvider.getCurrentUserId();
+        boolean isOwner = post.getAuthor().getId().equals(currentUserId);
+        boolean isAdmin = authenticatedUserProvider.hasAdminRole();
+
+        if (!isOwner && !isAdmin) {
+            throw new UnauthorizedPostActionException("You are not allowed to perform this action on this post");
+        }
     }
 }

@@ -51,7 +51,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
-
     @Override
     public List<User> getAllUsers() {
         return userRepository.getAllUsers();
@@ -59,6 +58,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> updateUserById(UUID userId, String newName, String newEmail, String newPassword) {
+        userProvider.validateCurrentUserAccess(userId);
+
         User user = userRepository.getUserById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
