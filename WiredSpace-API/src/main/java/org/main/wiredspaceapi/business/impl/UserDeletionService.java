@@ -7,6 +7,7 @@ import org.main.wiredspaceapi.persistence.PostRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class UserDeletionService {
     private final MessageRepository messageRepository;
     private final AuthenticatedUserProvider userProvider;
 
+    @Transactional
     public void deleteUserCompletely(UUID userId) {
         userProvider.validateCurrentUserAccess(userId);
 
