@@ -7,6 +7,7 @@ import org.main.wiredspaceapi.persistence.mapper.ReportEntityMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +39,7 @@ public class ReportRepositoryImpl implements ReportRepository {
                 .toList();
     }
 
+    @Transactional
     @Override
     public void deleteAllByReporter(UUID reporterId) {
         reportDB.deleteAllByReporter_Id(reporterId);
