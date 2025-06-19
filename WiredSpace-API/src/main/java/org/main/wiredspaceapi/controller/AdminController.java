@@ -111,6 +111,14 @@ public class AdminController {
                 .orElseThrow(() -> new RuntimeException("Demotion failed unexpectedly."));
         return ResponseEntity.ok(user);
     }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/promote-support-to-admin")
+    public ResponseEntity<Admin> promoteSupportToAdmin(@RequestBody PromoteUserArgs request) {
+        Admin admin = adminService.promoteSupportToAdmin(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Promotion to ADMIN failed"));
+        return ResponseEntity.ok(admin);
+    }
+
 
     @GetMapping("/user/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {

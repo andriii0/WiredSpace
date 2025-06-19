@@ -2,6 +2,7 @@ package org.main.wiredspaceapi.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.main.wiredspaceapi.domain.enums.AdminRole;
 

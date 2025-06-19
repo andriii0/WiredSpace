@@ -2,6 +2,7 @@ package org.main.wiredspaceapi.business.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.AdminService;
+import org.main.wiredspaceapi.business.MessageService;
 import org.main.wiredspaceapi.controller.exceptions.*;
 import org.main.wiredspaceapi.domain.Admin;
 import org.main.wiredspaceapi.domain.User;
@@ -9,6 +10,7 @@ import org.main.wiredspaceapi.domain.enums.AdminRole;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.main.wiredspaceapi.persistence.impl.message.MessageRepositoryImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +24,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
+
 
     public Admin createAdmin(String name, String email, String password, AdminRole role) {
         return adminRepository.createAdmin(name, email, password, role);
@@ -63,6 +66,21 @@ public class AdminServiceImpl implements AdminService {
                 adminRole
         ));
     }
+    @Override
+    public Optional<Admin> promoteSupportToAdmin(UUID userId) {
+        Optional<Admin> supportOpt = adminRepository.findAdminById(userId);
+        if (supportOpt.isEmpty()) return Optional.empty();
+
+        Admin support = supportOpt.get();
+
+        if (support.getRole() != AdminRole.SUPPORT) {
+            throw new IllegalArgumentException("User is not SUPPORT");
+        }
+
+        support.setRole(AdminRole.ADMIN);
+        return Optional.of(adminRepository.updateAdmin(support));
+    }
+
 
     public Optional<User> demoteAdminToUser(UUID adminId, UserRole userRole) {
         Optional<Admin> adminOpt = adminRepository.findAdminById(adminId);

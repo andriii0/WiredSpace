@@ -1,12 +1,16 @@
 package org.main.wiredspaceapi.controller.dto;
 
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import java.sql.Date; 
 
-public record DailyStatsDto(
-        LocalDate date,
-        long users,
-        long posts,
-        long comments,
-        long likes,
-        long reports
-) {}
+@Data
+@AllArgsConstructor
+public class DailyStatsDto {
+    private Date date;
+    private long users;
+    private long posts;
+    private long comments;
+    private long likes;
+    private long reports;
+}

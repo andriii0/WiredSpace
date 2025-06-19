@@ -20,5 +20,6 @@ public interface AdminService {
     Optional<Admin> findAdminByEmail(String email);
 
     Optional<Admin> promoteUserToAdmin(UUID userId, AdminRole adminRole);
+    Optional<Admin> promoteSupportToAdmin(UUID userId);
     Optional<User> demoteAdminToUser(UUID adminId, UserRole userRole);
 }
