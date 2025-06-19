@@ -11,6 +11,7 @@ import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserStatisticsDTO;
+import org.main.wiredspaceapi.controller.exceptions.AdminNotFoundException;
 import org.main.wiredspaceapi.controller.exceptions.SelfDemotionException;
 import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.controller.mapper.FriendshipMapper;
@@ -18,6 +19,7 @@ import org.main.wiredspaceapi.controller.mapper.UserMapper;
 import org.main.wiredspaceapi.domain.Admin;
 import org.main.wiredspaceapi.domain.Report;
 import org.main.wiredspaceapi.domain.User;
+import org.main.wiredspaceapi.domain.enums.AdminRole;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,6 +45,51 @@ public class AdminController {
     private final StatisticsService statisticsService;
 
     //ADMIN
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/admins")
+    public ResponseEntity<List<Admin>> getAllAdmins() {
+        return ResponseEntity.ok(adminService.getAllAdmins());
+    }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/admin/{id}")
+    public ResponseEntity<Admin> getAdminById(@PathVariable UUID id) {
+        return adminService.getAdminById(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new AdminNotFoundException("Admin with ID " + id + " not found."));
+    }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/admin/email")
+    public ResponseEntity<Admin> getAdminByEmail(@RequestParam String email) {
+        return adminService.findAdminByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new AdminNotFoundException("Admin with email " + email + " not found."));
+    }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/admin/create")
+    public ResponseEntity<Admin> createAdmin(@RequestParam String name,
+                                             @RequestParam String email,
+                                             @RequestParam String password,
+                                             @RequestParam AdminRole role) {
+        Admin admin = adminService.createAdmin(name, email, password, role);
+        return ResponseEntity.ok(admin);
+    }
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PutMapping("/admin/update")
+    public ResponseEntity<Admin> updateAdmin(@RequestBody Admin admin) {
+        return ResponseEntity.ok(adminService.updateAdmin(admin));
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteAdmin(@PathVariable UUID id) {
+        UUID currentAdminId = authenticatedUserProvider.getCurrentUserId();
+        if (currentAdminId.equals(id)) {
+            throw new SelfDemotionException("You cannot delete yourself.");
+        }
+
+        adminService.deleteAdmin(id);
+        return ResponseEntity.ok().build();
+    }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/promote")
