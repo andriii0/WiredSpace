@@ -1,10 +1,11 @@
 package org.main.wiredspaceapi.business.impl;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.CommentService;
 import org.main.wiredspaceapi.business.PostLikeService;
 import org.main.wiredspaceapi.business.PostService;
+import org.main.wiredspaceapi.business.ReportService;
 import org.main.wiredspaceapi.controller.dto.post.PostCreateDTO;
 import org.main.wiredspaceapi.controller.dto.post.PostDTO;
 import org.main.wiredspaceapi.controller.dto.user.UserDTO;
@@ -34,6 +35,7 @@ public class PostServiceImpl implements PostService {
     private final UserStatisticsService userStatisticsService;
     private final CommentService commentService;
     private final PostLikeService postLikeService;
+    private final ReportService reportService;
 
     @Override
     public PostDTO createPost(PostCreateDTO dto) {
@@ -82,6 +84,7 @@ public class PostServiceImpl implements PostService {
         return enrichWithLikes(postConverter.postToPostDto(updatedPost), id);
     }
 
+    @Transactional
     @Override
     public void deletePost(Long id) {
         Post post = postRepository.getById(id)
@@ -89,6 +92,7 @@ public class PostServiceImpl implements PostService {
 
         validatePostOwnershipOrAdmin(post);
 
+        reportService.deleteAllByPost(id);
         postLikeService.deleteAllLikesForPost(id);
         commentService.getCommentsByPostId(id)
                 .forEach(comment -> commentService.deleteComment(comment.getId()));
