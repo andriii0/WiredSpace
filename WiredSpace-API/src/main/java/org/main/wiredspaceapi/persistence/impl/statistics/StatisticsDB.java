@@ -1,13 +1,14 @@
-package org.main.wiredspaceapi.persistence.impl;
+package org.main.wiredspaceapi.persistence.impl.statistics;
 
 import org.main.wiredspaceapi.controller.dto.DailyStatsDto;
-import org.main.wiredspaceapi.domain.Account;
+import org.main.wiredspaceapi.persistence.entity.AccountEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface StatisticsDB extends Repository<Account, byte[]> {
+public interface StatisticsDB extends Repository<AccountEntity, UUID> {
 
     @Query(value = """
         SELECT

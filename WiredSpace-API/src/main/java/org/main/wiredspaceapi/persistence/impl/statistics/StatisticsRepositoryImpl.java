@@ -1,4 +1,4 @@
-package org.main.wiredspaceapi.persistence.impl;
+package org.main.wiredspaceapi.persistence.impl.statistics;
 
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.controller.dto.DailyStatsDto;

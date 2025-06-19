@@ -135,7 +135,7 @@ public class AdminController {
     }
 
     // Platform statistics
-    
+
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/statistics/last-30-days")
     public ResponseEntity<List<DailyStatsDto>> getLast30DaysStats() {

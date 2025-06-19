@@ -51,26 +51,12 @@ public class PostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PostDTO> updatePost(@PathVariable Long id, @RequestBody PostCreateDTO dto) {
-        UUID userId = authenticatedUserProvider.getCurrentUserId();
-        PostDTO post = postService.getPostById(id);
-
-        if (!post.getAuthorId().equals(userId)) {
-            throw new UnauthorizedPostActionException("You are not the owner of this post.");
-        }
-
         PostDTO updated = postService.updatePost(id, dto);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        UUID userId = authenticatedUserProvider.getCurrentUserId();
-        PostDTO post = postService.getPostById(id);
-
-        if (!post.getAuthorId().equals(userId)) {
-            throw new UnauthorizedPostActionException("You are not the owner of this post.");
-        }
-
         postService.deletePost(id);
         return ResponseEntity.noContent().build();
     }
