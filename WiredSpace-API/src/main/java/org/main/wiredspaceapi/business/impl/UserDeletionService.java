@@ -26,11 +26,12 @@ public class UserDeletionService {
     public void deleteUserCompletely(UUID userId) {
         userProvider.validateCurrentUserAccess(userId);
 
-        //POST part
 
         commentRepository.deleteAllByUserId(userId);
         postRepository.deleteAllByUserId(userId);
         postRepository.deleteAllByUserId(userId);
+
+        messageRepository.deleteAllConversationsForUser(userRepository.getUserById(userId).get().getEmail());
 
         userRepository.deleteUser(userId);
     }
