@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 @Repository
@@ -89,8 +90,16 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public List<Post> findRandomPostsExcludingUsers(List<UUID> excludedUserIds, UUID currentUserId, LocalDateTime from, LocalDateTime to, int limit) {
-        return postDB.findRandomPostsExcludingUsers(excludedUserIds, currentUserId, from, to, limit).stream()
+    public List<Post> findRandomPostsExcludingUsers(List<UUID> excludedUserIds, UUID currentUserId,
+                                                    LocalDateTime from, LocalDateTime to, int limit) {
+        int total = postDB.countPostsExcludingUsers(excludedUserIds, currentUserId, from, to);
+        if (total == 0) return List.of();
+
+        int maxOffset = Math.max(0, total - limit);
+        int offset = new Random().nextInt(maxOffset + 1); // random offset between 0 and maxOffset
+
+        return postDB.findPostsExcludingUsersWithOffset(excludedUserIds, currentUserId, from, to, limit, offset)
+                .stream()
                 .map(postEntityMapper::toDomain)
                 .toList();
     }

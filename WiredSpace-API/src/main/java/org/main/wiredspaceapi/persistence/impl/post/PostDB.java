@@ -42,15 +42,26 @@ public interface PostDB extends JpaRepository<PostEntity, Long> {
     WHERE p.user_id NOT IN (:excludedUserIds)
       AND p.user_id != :currentUserId
       AND p.created_at BETWEEN :from AND :to
-    ORDER BY RAND()
-    LIMIT :limit
+    LIMIT :limit OFFSET :offset
 """, nativeQuery = true)
-    List<PostEntity> findRandomPostsExcludingUsers(
+    List<PostEntity> findPostsExcludingUsersWithOffset(
             @Param("excludedUserIds") List<UUID> excludedUserIds,
             @Param("currentUserId") UUID currentUserId,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
-            @Param("limit") int limit
+            @Param("limit") int limit,
+            @Param("offset") int offset
     );
-
+    @Query(value = """
+    SELECT COUNT(*) FROM posts p
+    WHERE p.user_id NOT IN (:excludedUserIds)
+      AND p.user_id != :currentUserId
+      AND p.created_at BETWEEN :from AND :to
+""", nativeQuery = true)
+    int countPostsExcludingUsers(
+            @Param("excludedUserIds") List<UUID> excludedUserIds,
+            @Param("currentUserId") UUID currentUserId,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
+    );
 }
