@@ -30,12 +30,12 @@ test:
 
 cypress-test:
   stage: cypress-test
-  image: node:20
+  image: node:20  
   script:
     - cd wiredspace-frontend
     - npm install
-    - Start-Process -NoNewWindow -FilePath "npx" -ArgumentList "vite"
-    - Write-Output "Waiting for Vite server to start..."
+    - powershell -Command "Start-Job { npm run dev; Start-Sleep -Seconds 10 }"
+    - Write-Output "Waiting for frontend to start..."
     - for ($i = 0; $i -lt 10; $i++) {
       try {
       $result = Invoke-WebRequest -Uri "http://localhost:5173" -UseBasicParsing -TimeoutSec 2
