@@ -63,6 +63,13 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.getUserById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
+        if (newEmail != null && !newEmail.trim().isEmpty() && !newEmail.equals(user.getEmail())) {
+            Optional<User> userWithSameEmail = userRepository.findByEmail(newEmail);
+            if (userWithSameEmail.isPresent()) {
+                throw new AccountAlreadyExistsException("Email " + newEmail + " is already in use");
+            }
+        }
+
         String nameToSet = (newName != null && !newName.trim().isEmpty()) ? newName : user.getName();
         String emailToSet = (newEmail != null && !newEmail.trim().isEmpty()) ? newEmail : user.getEmail();
         String passwordToSet = (newPassword != null && !newPassword.trim().isEmpty())
@@ -70,6 +77,7 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.updateUser(user.getId(), nameToSet, emailToSet, passwordToSet);
     }
+
 
     public void deleteUser(UUID id) {
         if (!userRepository.getUserById(id).isPresent()) {
