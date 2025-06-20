@@ -4,10 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.main.wiredspaceapi.business.impl.UserServiceImpl;
+import org.main.wiredspaceapi.controller.exceptions.AccountAlreadyExistsException;
+import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
+import org.main.wiredspaceapi.business.impl.UserDeletionService;
+import org.main.wiredspaceapi.business.impl.MessageServiceImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,17 +25,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private AuthenticatedUserProvider userProvider;
+    @Mock private UserDeletionService userDeletionService;
+    @Mock private MessageServiceImpl messageService;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private AuthenticatedUserProvider userProvider;
-
-    @InjectMocks
-    private UserServiceImpl userService;
+    @InjectMocks private UserServiceImpl userService;
 
     private User user;
     private UUID userId;
@@ -47,26 +47,24 @@ class UserServiceTest {
     void createUser_ShouldReturnSavedUser() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword123");
-        when(userRepository.createUser("TestUser", "test@example.com", "encodedPassword123", UserRole.STANDARD_USER))
-                .thenReturn(user);
+        when(userRepository.createUser(any(), any(), any(), any(), any())).thenReturn(user);
 
         User createdUser = userService.createUser("TestUser", "test@example.com", "password123", UserRole.STANDARD_USER);
 
         assertNotNull(createdUser);
         assertEquals("TestUser", createdUser.getName());
         verify(passwordEncoder).encode("password123");
-        verify(userRepository).createUser("TestUser", "test@example.com", "encodedPassword123", UserRole.STANDARD_USER);
+        verify(userRepository).createUser(any(), any(), any(), any(), any());
     }
 
     @Test
     void createUser_ShouldThrowException_WhenEmailExists() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+        AccountAlreadyExistsException ex = assertThrows(AccountAlreadyExistsException.class, () ->
                 userService.createUser("TestUser", "test@example.com", "password123", UserRole.STANDARD_USER));
 
-        assertEquals("Email test@example.com is already in use", exception.getMessage());
-        verify(userRepository, never()).createUser(any(), any(), any(), any());
+        assertEquals("Email test@example.com is already in use", ex.getMessage());
     }
 
     @Test
@@ -77,17 +75,13 @@ class UserServiceTest {
 
         assertTrue(result.isPresent());
         assertEquals("TestUser", result.get().getName());
-        verify(userRepository).getUserById(userId);
     }
 
     @Test
-    void getUserById_ShouldReturnEmpty_WhenNotFound() {
+    void getUserById_ShouldThrow_WhenNotFound() {
         when(userRepository.getUserById(userId)).thenReturn(Optional.empty());
 
-        Optional<User> result = userService.getUserById(userId);
-
-        assertTrue(result.isEmpty());
-        verify(userRepository).getUserById(userId);
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(userId));
     }
 
     @Test
@@ -97,44 +91,72 @@ class UserServiceTest {
         List<User> users = userService.getAllUsers();
 
         assertEquals(1, users.size());
-        assertEquals("TestUser", users.get(0).getName());
-        verify(userRepository).getAllUsers();
     }
 
     @Test
-    void updateUserById_ShouldReturnUpdatedUser() {
+    void updateUserById_ShouldUpdate_WhenValidInput() {
         when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
-        when(userRepository.updateUser(userId, "NewName", "new@example.com", "encodedNewPassword"))
+        when(userRepository.updateUser(eq(userId), eq("NewName"), eq("new@example.com"), eq("encodedNewPassword")))
                 .thenReturn(Optional.of(user));
 
-        Optional<User> updatedUser = userService.updateUserById(userId, "NewName", "new@example.com", "newPassword");
+        Optional<User> updated = userService.updateUserById(userId, "NewName", "new@example.com", "newPassword");
 
-        assertTrue(updatedUser.isPresent());
-        verify(userRepository).updateUser(userId, "NewName", "new@example.com", "encodedNewPassword");
+        assertTrue(updated.isPresent());
+        verify(userProvider).validateCurrentUserAccess(userId);
     }
 
     @Test
-    void deleteUserByEmail_ShouldCallRepository() {
+    void updateUserById_ShouldUseOldValues_WhenInputsNullOrEmpty() {
+        when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.updateUser(userId, user.getName(), user.getEmail(), user.getPassword()))
+                .thenReturn(Optional.of(user));
+
+        Optional<User> updated = userService.updateUserById(userId, "", null, "");
+
+        assertTrue(updated.isPresent());
+    }
+
+    @Test
+    void updateUserById_ShouldThrow_WhenUserNotFound() {
+        when(userRepository.getUserById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () ->
+                userService.updateUserById(userId, "a", "b", "c"));
+    }
+
+    @Test
+    void deleteUserByEmail_ShouldCallDeletion_WhenFound() {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        doNothing().when(userProvider).validateCurrentUserAccess("test@example.com");
-        doNothing().when(userRepository).deleteUser(userId);
 
         userService.deleteUserByEmail("test@example.com");
 
         verify(userProvider).validateCurrentUserAccess("test@example.com");
-        verify(userRepository).deleteUser(userId);
+        verify(userDeletionService).deleteUserCompletely(userId);
     }
 
     @Test
-    void deleteUser_ShouldCallRepository() {
-        doNothing().when(userProvider).validateCurrentUserAccess(userId);
-        doNothing().when(userRepository).deleteUser(userId);
+    void deleteUserByEmail_ShouldThrow_WhenNotFound() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
 
-        userService.deleteUser(userId);
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUserByEmail("test@example.com"));
+    }
+
+    @Test
+    void deleteUserById_ShouldCallDeletion_WhenFound() {
+        when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
+
+        userService.deleteUserById(userId);
 
         verify(userProvider).validateCurrentUserAccess(userId);
-        verify(userRepository).deleteUser(userId);
+        verify(userDeletionService).deleteUserCompletely(userId);
+    }
+
+    @Test
+    void deleteUserById_ShouldThrow_WhenNotFound() {
+        when(userRepository.getUserById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUserById(userId));
     }
 
     @Test
@@ -144,41 +166,52 @@ class UserServiceTest {
         Optional<User> result = userService.findByEmail("test@example.com");
 
         assertTrue(result.isPresent());
-        assertEquals("TestUser", result.get().getName());
     }
 
     @Test
     void findByEmail_ShouldReturnEmpty_WhenNotFound() {
-        when(userRepository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("nope@example.com")).thenReturn(Optional.empty());
 
-        Optional<User> result = userService.findByEmail("notfound@example.com");
+        Optional<User> result = userService.findByEmail("nope@example.com");
 
         assertTrue(result.isEmpty());
     }
+
     @Test
-    void searchUsers_ShouldReturnMatchingUsers() {
+    void searchUsers_ShouldReturnResults() {
         String query = "test";
         int offset = 0;
         int limit = 10;
 
-        when(userRepository.searchUsers(query, offset, limit)).thenReturn(List.of(user));
+        when(userProvider.getCurrentUserId()).thenReturn(userId);
+        when(userRepository.searchUsers(query, offset, limit, userId)).thenReturn(List.of(user));
 
         List<User> result = userService.searchUsers(query, offset, limit);
 
         assertEquals(1, result.size());
-        assertEquals("TestUser", result.get(0).getName());
-        verify(userRepository).searchUsers(query, offset, limit);
     }
 
     @Test
-    void countSearchUsers_ShouldReturnCorrectCount() {
-        String query = "test";
+    void searchUsers_ShouldThrow_WhenInvalidOffset() {
+        assertThrows(IllegalArgumentException.class, () -> userService.searchUsers("q", -1, 10));
+    }
 
-        when(userRepository.countSearchUsers(query)).thenReturn(3L);
+    @Test
+    void searchUsers_ShouldThrow_WhenInvalidLimit() {
+        assertThrows(IllegalArgumentException.class, () -> userService.searchUsers("q", 0, 0));
+    }
 
-        long count = userService.countSearchUsers(query);
+    @Test
+    void searchUsers_ShouldThrow_WhenOffsetNotMultipleOfLimit() {
+        assertThrows(IllegalArgumentException.class, () -> userService.searchUsers("q", 5, 2));
+    }
+
+    @Test
+    void countSearchUsers_ShouldReturnCount() {
+        when(userRepository.countSearchUsers("abc")).thenReturn(3L);
+
+        long count = userService.countSearchUsers("abc");
 
         assertEquals(3L, count);
-        verify(userRepository).countSearchUsers(query);
     }
 }

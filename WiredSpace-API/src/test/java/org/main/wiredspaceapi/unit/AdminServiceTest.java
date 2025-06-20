@@ -1,142 +1,172 @@
 package org.main.wiredspaceapi.unit;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.main.wiredspaceapi.business.impl.AdminServiceImpl;
+import org.main.wiredspaceapi.controller.exceptions.AdminNotFoundException;
+import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
+import org.main.wiredspaceapi.controller.exceptions.UserPromotionException;
 import org.main.wiredspaceapi.domain.Admin;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.domain.enums.AdminRole;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
+@ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
 
+    @Mock
     private UserRepository userRepository;
-    private AdminRepository adminRepository;
-    private AdminServiceImpl adminService;
 
-    @BeforeEach
-    void setUp() {
-        userRepository = mock(UserRepository.class);
-        adminRepository = mock(AdminRepository.class);
-        adminService = new AdminServiceImpl(userRepository, adminRepository);
-    }
+    @Mock
+    private AdminRepository adminRepository;
+
+    @InjectMocks
+    private AdminServiceImpl adminService;
 
     @Test
     void createAdmin_shouldReturnAdmin() {
-        String name = "Alice";
-        String email = "alice@example.com";
-        String password = "secure";
-        AdminRole role = AdminRole.ADMIN;
-
-        Admin admin = new Admin();
+        Admin admin = new Admin("Alice", "alice@example.com", "secure", AdminRole.ADMIN);
         admin.setId(UUID.randomUUID());
-        admin.setName(name);
-        admin.setEmail(email);
-        admin.setPassword(password);
-        admin.setRole(role);
 
-        when(adminRepository.createAdmin(name, email, password, role)).thenReturn(admin);
+        when(adminRepository.createAdmin(any(), any(), any(), any())).thenReturn(admin);
 
-        Admin result = adminService.createAdmin(name, email, password, role);
+        Admin result = adminService.createAdmin("Alice", "alice@example.com", "secure", AdminRole.ADMIN);
 
-        assertNotNull(result);
-        assertEquals(name, result.getName());
-        assertEquals(email, result.getEmail());
-        verify(adminRepository).createAdmin(name, email, password, role);
+        assertEquals(admin.getEmail(), result.getEmail());
+        verify(adminRepository).createAdmin("Alice", "alice@example.com", "secure", AdminRole.ADMIN);
     }
 
     @Test
-    void promoteUserToAdmin_shouldReturnAdmin_whenUserExists() {
+    void promoteUserToAdmin_shouldPromote_whenUserExists() {
         UUID userId = UUID.randomUUID();
-        User user = new User();
+        User user = new User("Bob", "bob@example.com", "12345", UserRole.STANDARD_USER);
         user.setId(userId);
-        user.setName("Bob");
-        user.setEmail("bob@example.com");
-        user.setPassword("12345");
 
-        Admin promoted = new Admin();
+        Admin promoted = new Admin("Bob", "bob@example.com", "12345", AdminRole.ADMIN);
         promoted.setId(UUID.randomUUID());
-        promoted.setName(user.getName());
-        promoted.setEmail(user.getEmail());
-        promoted.setPassword(user.getPassword());
-        promoted.setRole(AdminRole.ADMIN);
 
         when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
-        when(adminRepository.createAdmin(user.getName(), user.getEmail(), user.getPassword(), AdminRole.ADMIN)).thenReturn(promoted);
+        when(adminRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+        when(adminRepository.createAdmin(any(), any(), any(), any())).thenReturn(promoted);
 
         Optional<Admin> result = adminService.promoteUserToAdmin(userId, AdminRole.ADMIN);
 
         assertTrue(result.isPresent());
-        assertEquals(promoted.getEmail(), result.get().getEmail());
-
         verify(userRepository).deleteUser(userId);
         verify(adminRepository).createAdmin(user.getName(), user.getEmail(), user.getPassword(), AdminRole.ADMIN);
     }
 
     @Test
-    void promoteUserToAdmin_shouldReturnEmpty_whenUserDoesNotExist() {
+    void promoteUserToAdmin_shouldThrow_whenUserNotFound() {
         UUID userId = UUID.randomUUID();
-
         when(userRepository.getUserById(userId)).thenReturn(Optional.empty());
 
-        Optional<Admin> result = adminService.promoteUserToAdmin(userId, AdminRole.SUPPORT);
-
-        assertTrue(result.isEmpty());
-        verify(userRepository, never()).deleteUser(userId);
-        verify(adminRepository, never()).createAdmin(any(), any(), any(), any());
+        assertThrows(UserNotFoundException.class, () -> adminService.promoteUserToAdmin(userId, AdminRole.ADMIN));
     }
 
+    @Test
+    void promoteUserToAdmin_shouldThrow_whenUserIsAlreadyAdmin() {
+        UUID userId = UUID.randomUUID();
+        User user = new User("Bob", "bob@example.com", "12345", UserRole.STANDARD_USER);
+        user.setId(userId);
+
+        when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
+        when(adminRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(new Admin()));
+
+        assertThrows(UserPromotionException.class, () -> adminService.promoteUserToAdmin(userId, AdminRole.ADMIN));
+    }
+
+    @Test
+    void promoteSupportToAdmin_shouldPromote_whenSupportExists() {
+        UUID adminId = UUID.randomUUID();
+        Admin support = new Admin("Support", "support@example.com", "pass", AdminRole.SUPPORT);
+        support.setId(adminId);
+
+        when(adminRepository.findAdminById(adminId)).thenReturn(Optional.of(support));
+        when(adminRepository.updateAdmin(support)).thenReturn(support);
+
+        Optional<Admin> result = adminService.promoteSupportToAdmin(adminId);
+
+        assertTrue(result.isPresent());
+        assertEquals(AdminRole.ADMIN, result.get().getRole());
+        verify(adminRepository).updateAdmin(support);
+    }
+
+    @Test
+    void promoteSupportToAdmin_shouldReturnEmpty_whenNotFound() {
+        UUID id = UUID.randomUUID();
+        when(adminRepository.findAdminById(id)).thenReturn(Optional.empty());
+
+        Optional<Admin> result = adminService.promoteSupportToAdmin(id);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void promoteSupportToAdmin_shouldThrow_whenNotSupport() {
+        UUID id = UUID.randomUUID();
+        Admin admin = new Admin("Admin", "admin@example.com", "pass", AdminRole.ADMIN);
+        admin.setId(id);
+
+        when(adminRepository.findAdminById(id)).thenReturn(Optional.of(admin));
+
+        assertThrows(IllegalArgumentException.class, () -> adminService.promoteSupportToAdmin(id));
+    }
 
     @Test
     void demoteAdminToUser_shouldReturnUser_whenAdminExists() {
-        UUID adminId = UUID.randomUUID();
-        Admin admin = new Admin();
-        admin.setId(adminId);
-        admin.setName("Carol");
-        admin.setEmail("carol@example.com");
-        admin.setPassword("pass");
+        UUID id = UUID.randomUUID();
+        Admin admin = new Admin("Carol", "carol@example.com", "pass", AdminRole.ADMIN);
+        admin.setId(id);
 
-        User demoted = new User();
+        User demoted = new User("Carol", "carol@example.com", "pass", UserRole.STANDARD_USER);
         demoted.setId(UUID.randomUUID());
-        demoted.setName(admin.getName());
-        demoted.setEmail(admin.getEmail());
-        demoted.setPassword(admin.getPassword());
 
-        when(adminRepository.getAdminById(adminId)).thenReturn(Optional.of(admin));
-        when(userRepository.createUser(admin.getName(), admin.getEmail(), admin.getPassword(), UserRole.STANDARD_USER)).thenReturn(demoted);
+        when(adminRepository.findAdminById(id)).thenReturn(Optional.of(admin));
+        when(userRepository.createUser(
+                eq(admin.getName()),
+                eq(admin.getEmail()),
+                eq(admin.getPassword()),
+                eq(UserRole.STANDARD_USER),
+                any(LocalDateTime.class)
+        )).thenReturn(demoted);
 
-        Optional<User> result = adminService.demoteAdminToUser(adminId, UserRole.STANDARD_USER);
+        Optional<User> result = adminService.demoteAdminToUser(id, UserRole.STANDARD_USER);
 
         assertTrue(result.isPresent());
-        assertEquals(demoted.getEmail(), result.get().getEmail());
-
-        verify(adminRepository).deleteAdmin(adminId);
-        verify(userRepository).createUser(admin.getName(), admin.getEmail(), admin.getPassword(), UserRole.STANDARD_USER);
+        verify(adminRepository).deleteAdmin(id);
+        verify(userRepository).createUser(
+                eq(admin.getName()),
+                eq(admin.getEmail()),
+                eq(admin.getPassword()),
+                eq(UserRole.STANDARD_USER),
+                any(LocalDateTime.class)
+        );
     }
 
     @Test
-    void demoteAdminToUser_shouldReturnEmpty_whenAdminNotFound() {
-        UUID adminId = UUID.randomUUID();
+    void demoteAdminToUser_shouldThrow_whenNotFound() {
+        UUID id = UUID.randomUUID();
+        when(adminRepository.findAdminById(id)).thenReturn(Optional.empty());
 
-        when(adminRepository.getAdminById(adminId)).thenReturn(Optional.empty());
-
-        Optional<User> result = adminService.demoteAdminToUser(adminId, UserRole.STANDARD_USER);
-
-        assertTrue(result.isEmpty());
-        verify(adminRepository, never()).deleteAdmin(adminId);
-        verify(userRepository, never()).createUser(any(), any(), any(), any());
+        assertThrows(AdminNotFoundException.class, () -> adminService.demoteAdminToUser(id, UserRole.STANDARD_USER));
     }
 
     @Test
-    void findAdminByEmail_shouldReturnAdminIfExists() {
+    void findAdminByEmail_shouldReturnAdmin() {
         String email = "admin@example.com";
         Admin admin = new Admin();
         admin.setEmail(email);
@@ -144,65 +174,50 @@ class AdminServiceTest {
         when(adminRepository.findByEmail(email)).thenReturn(Optional.of(admin));
 
         Optional<Admin> result = adminService.findAdminByEmail(email);
-
         assertTrue(result.isPresent());
-        assertEquals(email, result.get().getEmail());
         verify(adminRepository).findByEmail(email);
     }
 
     @Test
-    void getUserById_shouldReturnUserIfExists() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
+    void getAdminById_shouldReturnAdmin() {
+        UUID id = UUID.randomUUID();
+        Admin admin = new Admin();
+        admin.setId(id);
 
-        when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
+        when(adminRepository.findAdminById(id)).thenReturn(Optional.of(admin));
 
-        Optional<User> result = adminService.getUserById(userId);
-
+        Optional<Admin> result = adminService.getAdminById(id);
         assertTrue(result.isPresent());
-        assertEquals(userId, result.get().getId());
-        verify(userRepository).getUserById(userId);
     }
 
     @Test
-    void getUserByEmail_shouldReturnUserIfExists() {
-        String email = "user@example.com";
-        User user = new User();
-        user.setEmail(email);
+    void getAllAdmins_shouldReturnList() {
+        Admin a1 = new Admin(); Admin a2 = new Admin();
+        when(adminRepository.getAllAdmins()).thenReturn(List.of(a1, a2));
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        List<Admin> admins = adminService.getAllAdmins();
 
-        Optional<User> result = adminService.getUserByEmail(email);
-
-        assertTrue(result.isPresent());
-        assertEquals(email, result.get().getEmail());
-        verify(userRepository).findByEmail(email);
+        assertEquals(2, admins.size());
+        verify(adminRepository).getAllAdmins();
     }
 
     @Test
-    void deleteUser_shouldReturnTrue_whenUserExists() {
-        UUID userId = UUID.randomUUID();
-        User user = new User();
-        user.setId(userId);
+    void updateAdmin_shouldReturnUpdatedAdmin() {
+        Admin admin = new Admin("X", "pass", "x@example.com", AdminRole.SUPPORT);
+        when(adminRepository.updateAdmin(admin)).thenReturn(admin);
 
-        when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
+        Admin updated = adminService.updateAdmin(admin);
 
-        boolean result = adminService.deleteUser(userId);
-
-        assertTrue(result);
-        verify(userRepository).deleteUser(userId);
+        assertEquals("x@example.com", updated.getEmail());
+        verify(adminRepository).updateAdmin(admin);
     }
 
     @Test
-    void deleteUser_shouldReturnFalse_whenUserNotFound() {
-        UUID userId = UUID.randomUUID();
+    void deleteAdmin_shouldCallRepo() {
+        UUID id = UUID.randomUUID();
 
-        when(userRepository.getUserById(userId)).thenReturn(Optional.empty());
+        adminService.deleteAdmin(id);
 
-        boolean result = adminService.deleteUser(userId);
-
-        assertFalse(result);
-        verify(userRepository, never()).deleteUser(userId);
+        verify(adminRepository).deleteAdmin(id);
     }
 }

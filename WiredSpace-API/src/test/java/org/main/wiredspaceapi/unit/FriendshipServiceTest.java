@@ -4,6 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.main.wiredspaceapi.business.impl.FriendshipServiceImpl;
+import org.main.wiredspaceapi.business.impl.UserStatisticsService;
+import org.main.wiredspaceapi.controller.exceptions.FriendshipAlreadyAcceptedException;
+import org.main.wiredspaceapi.controller.exceptions.FriendshipAlreadyExistsException;
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedFriendshipAccessException;
 import org.main.wiredspaceapi.domain.Friendship;
 import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.persistence.FriendshipRepository;
@@ -29,6 +33,9 @@ class FriendshipServiceTest {
 
     @Mock
     private AuthenticatedUserProvider authenticatedUserProvider;
+
+    @Mock
+    private UserStatisticsService userStatisticsService;
 
     @InjectMocks
     private FriendshipServiceImpl friendshipService;
@@ -61,7 +68,9 @@ class FriendshipServiceTest {
 
     @Test
     void sendFriendRequest_ShouldThrowException_WhenUserSendsToSelf() {
-        assertThrows(IllegalArgumentException.class,
+        when(userRepository.getUserById(userId)).thenReturn(Optional.of(mock(User.class)));
+
+        assertThrows(FriendshipAlreadyExistsException.class,
                 () -> friendshipService.sendFriendRequest(userId, userId));
     }
 
@@ -71,7 +80,7 @@ class FriendshipServiceTest {
         when(userRepository.getUserById(friendId)).thenReturn(Optional.of(mock(User.class)));
         when(friendshipRepository.findByUserAndFriend(userId, friendId)).thenReturn(Optional.of(friendship));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(FriendshipAlreadyExistsException.class,
                 () -> friendshipService.sendFriendRequest(userId, friendId));
     }
 
@@ -84,6 +93,8 @@ class FriendshipServiceTest {
         Friendship result = friendshipService.acceptFriendRequest(friendshipId);
 
         assertTrue(result.isAccepted());
+        verify(userStatisticsService).incrementFriends(friendship.getUserId());
+        verify(userStatisticsService).incrementFriends(friendship.getFriendId());
     }
 
     @Test
@@ -91,15 +102,14 @@ class FriendshipServiceTest {
         friendship = new Friendship(friendship.getId(), userId, friendId, true);
         when(friendshipRepository.findById(friendship.getId())).thenReturn(Optional.of(friendship));
 
-        assertThrows(IllegalStateException.class,
+        assertThrows(FriendshipAlreadyAcceptedException.class,
                 () -> friendshipService.acceptFriendRequest(friendship.getId()));
     }
 
     @Test
     void deleteFriendship_ShouldDelete_WhenCurrentUserIsInvolved() {
-        UUID currentUserId = userId;
         when(friendshipRepository.findById(friendship.getId())).thenReturn(Optional.of(friendship));
-        when(authenticatedUserProvider.getCurrentUserId()).thenReturn(currentUserId);
+        when(authenticatedUserProvider.getCurrentUserId()).thenReturn(userId);
 
         friendshipService.deleteFriendship(friendship.getId());
 
@@ -111,7 +121,7 @@ class FriendshipServiceTest {
         when(friendshipRepository.findById(friendship.getId())).thenReturn(Optional.of(friendship));
         when(authenticatedUserProvider.getCurrentUserId()).thenReturn(UUID.randomUUID());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(UnauthorizedFriendshipAccessException.class,
                 () -> friendshipService.deleteFriendship(friendship.getId()));
     }
 
@@ -134,6 +144,8 @@ class FriendshipServiceTest {
         Friendship result = friendshipService.updateFriendship(friendship.getId(), true);
 
         assertTrue(result.isAccepted());
+        verify(userStatisticsService).incrementFriends(friendship.getUserId());
+        verify(userStatisticsService).incrementFriends(friendship.getFriendId());
     }
 
     @Test

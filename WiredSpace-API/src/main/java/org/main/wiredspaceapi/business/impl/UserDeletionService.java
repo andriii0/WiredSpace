@@ -29,7 +29,6 @@ public class UserDeletionService {
 
         commentRepository.deleteAllByUserId(userId);
         postRepository.deleteAllByUserId(userId);
-        postRepository.deleteAllByUserId(userId);
 
         messageRepository.deleteAllConversationsForUser(userRepository.getUserById(userId).get().getEmail());
 
