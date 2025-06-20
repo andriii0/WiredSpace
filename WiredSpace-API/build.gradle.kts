@@ -1,6 +1,6 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.4.3"
+	id("org.springframework.boot") version "3.4.7"
 	id("io.spring.dependency-management") version "1.1.7"
 	id ("org.sonarqube") version "6.0.1.5171"
 	id("jacoco")
@@ -64,7 +64,7 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	runtimeOnly("com.mysql:mysql-connector-j")
+	runtimeOnly("com.mysql:mysql-connector-j:9.3.0")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -80,7 +80,6 @@ tasks.jacocoTestReport {
 		html.required.set(true)
 	}
 }
-
 
 tasks.withType<Test> {
 	useJUnitPlatform()
