@@ -180,7 +180,6 @@ class PostServiceTest {
 
         postService.deletePost(1L);
 
-        verify(reportService).deleteAllByPost(1L);
         verify(postLikeService).deleteAllLikesForPost(1L);
         verify(commentService).getCommentsByPostId(1L);
         verify(postRepository).delete(post);

@@ -92,7 +92,6 @@ public class PostServiceImpl implements PostService {
 
         validatePostOwnershipOrAdmin(post);
 
-        reportService.deleteAllByPost(id);
         postLikeService.deleteAllLikesForPost(id);
         commentService.getCommentsByPostId(id)
                 .forEach(comment -> commentService.deleteComment(comment.getId()));

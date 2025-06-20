@@ -12,9 +12,11 @@ import org.main.wiredspaceapi.domain.enums.AdminRole;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
+import org.mockito.Incubating;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,18 +39,24 @@ class AdminServiceTest {
     @InjectMocks
     private AdminServiceImpl adminService;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void createAdmin_shouldReturnAdmin() {
-        Admin admin = new Admin("Alice", "alice@example.com", "secure", AdminRole.ADMIN);
+        Admin admin = new Admin("Alice", "alice@example.com", "encodedPassword", AdminRole.ADMIN);
         admin.setId(UUID.randomUUID());
 
-        when(adminRepository.createAdmin(any(), any(), any(), any())).thenReturn(admin);
+        when(passwordEncoder.encode("secure")).thenReturn("encodedPassword");
+
+        when(adminRepository.createAdmin(any(), any(), eq("encodedPassword"), any())).thenReturn(admin);
 
         Admin result = adminService.createAdmin("Alice", "alice@example.com", "secure", AdminRole.ADMIN);
 
         assertEquals(admin.getEmail(), result.getEmail());
-        verify(adminRepository).createAdmin("Alice", "alice@example.com", "secure", AdminRole.ADMIN);
+        verify(adminRepository).createAdmin("Alice", "alice@example.com", "encodedPassword", AdminRole.ADMIN);
     }
+
 
     @Test
     void promoteUserToAdmin_shouldPromote_whenUserExists() {

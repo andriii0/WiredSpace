@@ -11,6 +11,7 @@ import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.persistence.impl.message.MessageRepositoryImpl;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,10 +25,12 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     public Admin createAdmin(String name, String email, String password, AdminRole role) {
-        return adminRepository.createAdmin(name, email, password, role);
+        String encodedPassword = passwordEncoder.encode(password);
+        return adminRepository.createAdmin(name, email, encodedPassword, role);
     }
 
     public Optional<Admin> getAdminById(UUID id) {
