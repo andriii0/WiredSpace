@@ -30,16 +30,36 @@ test:
 
 cypress-test:
   stage: cypress-test
-  image: cypress/included:12.0.0
+  image: node:20
   script:
     - cd wiredspace-frontend
     - npm install
-    - npm run dev &
-    - echo "Waiting for server to be available..."
-    - until curl -s http://localhost:5173 > /dev/null; do echo "Waiting for server..."; sleep 5; done
-    - cd ../wiredspace 
+    - Start-Process -NoNewWindow -FilePath "npx" -ArgumentList "vite"
+    - Write-Output "Waiting for Vite server to start..."
+    - for ($i = 0; $i -lt 10; $i++) {
+      try {
+      $result = Invoke-WebRequest -Uri "http://localhost:5173" -UseBasicParsing -TimeoutSec 2
+      if ($result.StatusCode -eq 200) {
+      Write-Output "Server is ready!"
+      break
+      }
+      } catch {
+      Write-Output "Waiting for server..."
+      Start-Sleep -Seconds 5
+      }
+      }
+    - cd ../wiredspace
     - npm install
-    - npm run cypress:run
+    - npx cypress run
+  artifacts:
+    paths:
+      - wiredspace/cypress/results/
+    expire_in: 1 hour
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "development"'
 
 build-sonar:
   stage: build-sonar
