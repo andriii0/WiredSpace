@@ -5,7 +5,7 @@ describe("Login flow", () => {
 
   it("logs in successfully with valid credentials", () => {
     cy.get("#email").type("vlad@gmail.com");
-    cy.get("#password").type("1234");
+    cy.get("#password").type("123456");
     cy.get("form").submit();
 
     cy.url().should("include", "/profile/me");

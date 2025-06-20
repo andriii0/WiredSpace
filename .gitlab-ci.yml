@@ -3,6 +3,7 @@ image: gradle:8.10.0-jdk17-jammy
 stages:
   - build
   - test
+  - cypress-test
   - build-sonar
   - deploy
 
@@ -27,6 +28,18 @@ test:
     - cd WiredSpace-API
     - ./gradlew.bat test
 
+cypress-test:
+  stage: cypress-test
+  image: cypress/included:12.0.0
+  script:
+    - cd wiredspace-frontend
+    - npm install
+    - npm run dev &
+    - echo "Waiting for server to be available..."
+    - until curl -s http://localhost:5173 > /dev/null; do echo "Waiting for server..."; sleep 5; done
+    - cd ../wiredspace 
+    - npm install
+    - npm run cypress:run
 
 build-sonar:
   stage: build-sonar
