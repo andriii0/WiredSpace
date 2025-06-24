@@ -244,4 +244,4 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,java,react,intellij,intellij+all
-WiredSpace-API/gradle.properties
+WiredSpace-API/src/main/resources/application-secret.properties
