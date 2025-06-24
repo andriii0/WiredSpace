@@ -15,10 +15,6 @@ before_script:
   - $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.14.7-hotspot"
   - $env:Path="$env:JAVA_HOME\bin;$env:Path"
   - java -version
-  - Write-Output "DB_URL=$env:DB_URL"
-  - Write-Output "JWT_SECRET=$env:JWT_SECRET"
-
-
 
 build:
   stage: build
