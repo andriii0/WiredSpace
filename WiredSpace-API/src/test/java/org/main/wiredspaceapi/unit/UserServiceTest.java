@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.unit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.main.wiredspaceapi.business.EmailService;
 import org.main.wiredspaceapi.business.impl.UserServiceImpl;
 import org.main.wiredspaceapi.controller.exceptions.AccountAlreadyExistsException;
 import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
@@ -30,6 +31,7 @@ class UserServiceTest {
     @Mock private AuthenticatedUserProvider userProvider;
     @Mock private UserDeletionService userDeletionService;
     @Mock private MessageServiceImpl messageService;
+    @Mock private EmailService emailService;
 
     @InjectMocks private UserServiceImpl userService;
 

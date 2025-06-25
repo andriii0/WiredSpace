@@ -3,6 +3,7 @@ package org.main.wiredspaceapi.unit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.main.wiredspaceapi.business.EmailService;
 import org.main.wiredspaceapi.business.impl.FriendshipServiceImpl;
 import org.main.wiredspaceapi.business.impl.UserStatisticsService;
 import org.main.wiredspaceapi.controller.exceptions.FriendshipAlreadyAcceptedException;
@@ -36,6 +37,9 @@ class FriendshipServiceTest {
 
     @Mock
     private UserStatisticsService userStatisticsService;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private FriendshipServiceImpl friendshipService;
