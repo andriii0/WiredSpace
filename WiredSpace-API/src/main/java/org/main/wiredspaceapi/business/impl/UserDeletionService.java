@@ -1,6 +1,7 @@
 package org.main.wiredspaceapi.business.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.main.wiredspaceapi.business.EmailService;
 import org.main.wiredspaceapi.persistence.CommentRepository;
 import org.main.wiredspaceapi.persistence.MessageRepository;
 import org.main.wiredspaceapi.persistence.PostRepository;

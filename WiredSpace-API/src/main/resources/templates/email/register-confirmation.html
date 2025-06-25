@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registration Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 20px;
+        }
+        .email-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <h2>Welcome to WiredSpace!</h2>
+    <p th:text="${message}">Your account has been successfully registered.</p>
+    <p>We’re glad to have you with us!</p>
+</div>
+</body>
+</html>

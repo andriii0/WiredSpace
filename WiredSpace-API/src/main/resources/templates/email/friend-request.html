@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New Friend Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+            padding: 20px;
+        }
+        .email-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <h2>New Friend Request</h2>
+    <p th:text="${message}">You have a new friend request on WiredSpace.</p>
+    <p>Log in to your account to view and accept it.</p>
+</div>
+</body>
+</html>

@@ -2,6 +2,7 @@ package org.main.wiredspaceapi.business.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.main.wiredspaceapi.business.EmailService;
 import org.main.wiredspaceapi.business.FriendshipService;
 import org.main.wiredspaceapi.business.impl.UserStatisticsService;
 import org.main.wiredspaceapi.controller.exceptions.FriendshipAlreadyAcceptedException;
@@ -9,6 +10,7 @@ import org.main.wiredspaceapi.controller.exceptions.FriendshipAlreadyExistsExcep
 import org.main.wiredspaceapi.controller.exceptions.UnauthorizedFriendshipAccessException;
 import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.domain.Friendship;
+import org.main.wiredspaceapi.domain.User;
 import org.main.wiredspaceapi.persistence.FriendshipRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
@@ -26,6 +28,7 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final UserRepository userRepository;
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final UserStatisticsService userStatisticsService;
+    private final EmailService emailService;
 
     @Override
     public Friendship sendFriendRequest(UUID userId, UUID friendId) {
@@ -43,7 +46,8 @@ public class FriendshipServiceImpl implements FriendshipService {
         }
 
         Friendship friendship = new Friendship(null, userId, friendId, false); // is not accepted by default
-
+        User friend = userRepository.getUserById(friendId).orElse(null);
+        emailService.sendNewFriendRequestConfirmation(friend.getEmail());
         return friendshipRepository.save(friendship);
     }
 

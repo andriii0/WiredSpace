@@ -2,6 +2,7 @@ package org.main.wiredspaceapi.business.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.main.wiredspaceapi.business.EmailService;
 import org.main.wiredspaceapi.business.UserService;
 import org.main.wiredspaceapi.controller.exceptions.AccountAlreadyExistsException;
 import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticatedUserProvider userProvider;
     private final MessageServiceImpl messageService;
     private final UserDeletionService userDeletionService;
+    private final EmailService emailService;
 
     @Override
     public User createUser(String name, String email, String password, UserRole userRole) {
@@ -34,6 +36,7 @@ public class UserServiceImpl implements UserService {
             throw new AccountAlreadyExistsException("Email " + email + " is already in use");
         }
         String encodedPassword = passwordEncoder.encode(password);
+        emailService.sendAccountRegisterConfirmation(email);
         return userRepository.createUser(name, email, encodedPassword, userRole, LocalDateTime.now());
     }
 
@@ -78,22 +81,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.updateUser(user.getId(), nameToSet, emailToSet, passwordToSet);
     }
 
-
-    public void deleteUser(UUID id) {
-        if (!userRepository.getUserById(id).isPresent()) {
-            throw new UserNotFoundException("User with ID " + id + " not found");
-        }
-
-        userProvider.validateCurrentUserAccess(id);
-        userDeletionService.deleteUserCompletely(id);
-    }
-
     @Override
     public void deleteUserByEmail(String targetEmail) {
         User user = findByEmail(targetEmail)
                 .orElseThrow(() -> new UserNotFoundException("User with email " + targetEmail + " not found"));
 
         userProvider.validateCurrentUserAccess(targetEmail);
+        emailService.sendAccountDeleteConfirmation(targetEmail);
         userDeletionService.deleteUserCompletely(user.getId());
     }
 
@@ -103,6 +97,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
         userProvider.validateCurrentUserAccess(userId);
+        emailService.sendAccountDeleteConfirmation(user.getEmail());
         userDeletionService.deleteUserCompletely(user.getId());
     }
 

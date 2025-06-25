@@ -70,6 +70,11 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
 	testImplementation("com.h2database:h2")
+
+
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+	implementation("jakarta.mail:jakarta.mail-api:2.1.2")
 }
 
 tasks.jacocoTestReport {
