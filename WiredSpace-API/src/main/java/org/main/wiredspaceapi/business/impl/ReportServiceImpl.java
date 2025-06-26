@@ -49,16 +49,16 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Report> getAllReports(int offset, int limit) {
-        if (!authenticatedUserProvider.hasAdminRole()) {
-            throw new UnauthorizedException("Only admins can view all reports.");
+        if (!authenticatedUserProvider.hasAdminRole() && !authenticatedUserProvider.hasSupportRole()) {
+            throw new UnauthorizedException("Only admins or support can ...");
         }
         return reportRepository.findAll(offset, limit);
     }
 
     @Override
     public void deleteReport(Long reportId) {
-        if (!authenticatedUserProvider.hasAdminRole()) {
-            throw new UnauthorizedException("Only admins can delete reports.");
+        if (!authenticatedUserProvider.hasAdminRole() && !authenticatedUserProvider.hasSupportRole()) {
+            throw new UnauthorizedException("Only admins or support can ...");
         }
         if (!reportRepository.existsById(reportId)) {
             throw new ReportNotFoundException("Report not found with id: " + reportId);
@@ -68,24 +68,24 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Report> getAllReportsForPost(Long postId) {
-        if (!authenticatedUserProvider.hasAdminRole()) {
-            throw new UnauthorizedException("Only admins can view reports for posts.");
+        if (!authenticatedUserProvider.hasAdminRole() && !authenticatedUserProvider.hasSupportRole()) {
+            throw new UnauthorizedException("Only admins or support can ...");
         }
         return reportRepository.getAllReportsForPost(postId);
     }
 
     @Override
     public void deleteAllByReporter(UUID reporterId) {
-        if (!authenticatedUserProvider.hasAdminRole()) {
-            throw new UnauthorizedException("Only admins can delete reports by reporter.");
+        if (!authenticatedUserProvider.hasAdminRole() && !authenticatedUserProvider.hasSupportRole()) {
+            throw new UnauthorizedException("Only admins or support can ...");
         }
         reportRepository.deleteAllByReporter(reporterId);
     }
 
     @Override
     public void deleteAllByPost(Long postId) {
-        if (!authenticatedUserProvider.hasAdminRole()) {
-            throw new UnauthorizedException("Only admins can delete reports for a post.");
+        if (!authenticatedUserProvider.hasAdminRole() && !authenticatedUserProvider.hasSupportRole()) {
+            throw new UnauthorizedException("Only admins or support can ...");
         }
         reportRepository.deleteAllByPost(postId);
     }

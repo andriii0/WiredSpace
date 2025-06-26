@@ -3,7 +3,9 @@ package org.main.wiredspaceapi.business.impl;
 import lombok.RequiredArgsConstructor;
 import org.main.wiredspaceapi.business.EmailService;
 import org.main.wiredspaceapi.domain.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -47,6 +49,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Async
     @Override
     public void sendAccountRegisterConfirmation(String email) {
         Map<String, Object> variables = new HashMap<>();
@@ -54,6 +57,7 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(email, "Account Registration Confirmation", "register-confirmation", variables);
     }
 
+    @Async
     @Override
     public void sendAccountDeleteConfirmation(String email) {
         Map<String, Object> variables = new HashMap<>();
@@ -61,6 +65,7 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(email, "Account Deletion Confirmation", "delete-confirmation", variables);
     }
 
+    @Async
     @Override
     public void sendNewFriendRequestConfirmation(String email) {
         Map<String, Object> variables = new HashMap<>();

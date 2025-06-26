@@ -35,7 +35,7 @@ public class ReportController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPPORT')")
     public ResponseEntity<List<ReportDTO>> getAllReports(
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit
@@ -49,7 +49,7 @@ public class ReportController {
     }
 
     @GetMapping("/post/{postId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPPORT')")
     public ResponseEntity<List<ReportDTO>> getAllReportsForPost(@PathVariable Long postId) {
         List<Report> reports = reportService.getAllReportsForPost(postId);
         List<ReportDTO> dtos = reports.stream()
@@ -59,21 +59,21 @@ public class ReportController {
     }
 
     @DeleteMapping("/{reportId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPPORT')")
     public ResponseEntity<Void> deleteReport(@PathVariable Long reportId) {
         reportService.deleteReport(reportId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/reporter/{reporterId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPPORT')")
     public ResponseEntity<Void> deleteAllByReporter(@PathVariable UUID reporterId) {
         reportService.deleteAllByReporter(reporterId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/post/{postId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPPORT')")
     public ResponseEntity<Void> deleteAllByPost(@PathVariable Long postId) {
         reportService.deleteAllByPost(postId);
         return ResponseEntity.noContent().build();
