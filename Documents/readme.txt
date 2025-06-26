@@ -6,8 +6,6 @@ email - admin@wired.space
 pass - admin123
 
 users -
-matvienkoandreus@gmail.com
-123456
 nikita@gmail.com
 1234
 vlad@gmail.com

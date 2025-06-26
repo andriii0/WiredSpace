@@ -11,6 +11,7 @@ import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
 import org.main.wiredspaceapi.persistence.impl.message.MessageRepositoryImpl;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
 
     public Admin createAdmin(String name, String email, String password, AdminRole role) {
@@ -42,14 +44,35 @@ public class AdminServiceImpl implements AdminService {
     }
 
     public Admin updateAdmin(Admin admin) {
+        UUID currentId = authenticatedUserProvider.getCurrentUserId();
+
+        if (!admin.getId().equals(currentId) && !authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("You can update only your own profile or be ADMIN.");
+        }
+
         return adminRepository.updateAdmin(admin);
     }
 
+
     public void deleteAdmin(UUID id) {
+        UUID currentId = authenticatedUserProvider.getCurrentUserId();
+
+        if (id.equals(currentId)) {
+            throw new SelfDemotionException("You cannot delete yourself.");
+        }
+
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only ADMIN can delete other admins.");
+        }
+
         adminRepository.deleteAdmin(id);
     }
 
     public Optional<Admin> promoteUserToAdmin(UUID userId, AdminRole adminRole) {
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only ADMIN can promote users.");
+        }
+
         Optional<User> userOpt = userRepository.getUserById(userId);
         if (userOpt.isEmpty()) {
             throw new UserNotFoundException("User with ID " + userId + " not found.");
@@ -71,6 +94,10 @@ public class AdminServiceImpl implements AdminService {
     }
     @Override
     public Optional<Admin> promoteSupportToAdmin(UUID userId) {
+        if (!authenticatedUserProvider.hasAdminRole()) {
+            throw new UnauthorizedException("Only ADMIN can promote SUPPORT to ADMIN.");
+        }
+
         Optional<Admin> supportOpt = adminRepository.findAdminById(userId);
         if (supportOpt.isEmpty()) return Optional.empty();
 
