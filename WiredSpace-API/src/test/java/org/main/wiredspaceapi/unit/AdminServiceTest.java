@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.main.wiredspaceapi.business.impl.AdminServiceImpl;
 import org.main.wiredspaceapi.controller.exceptions.AdminNotFoundException;
+import org.main.wiredspaceapi.controller.exceptions.SelfDemotionException;
+import org.main.wiredspaceapi.controller.exceptions.UnauthorizedException;
 import org.main.wiredspaceapi.controller.exceptions.UserNotFoundException;
 import org.main.wiredspaceapi.controller.exceptions.UserPromotionException;
 import org.main.wiredspaceapi.domain.Admin;
@@ -12,7 +14,7 @@ import org.main.wiredspaceapi.domain.enums.AdminRole;
 import org.main.wiredspaceapi.domain.enums.UserRole;
 import org.main.wiredspaceapi.persistence.AdminRepository;
 import org.main.wiredspaceapi.persistence.UserRepository;
-import org.mockito.Incubating;
+import org.main.wiredspaceapi.security.util.AuthenticatedUserProvider;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,8 +26,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
@@ -42,13 +44,17 @@ class AdminServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private AuthenticatedUserProvider authenticatedUserProvider;
+
+    private final UUID adminId = UUID.randomUUID();
+
     @Test
     void createAdmin_shouldReturnAdmin() {
         Admin admin = new Admin("Alice", "alice@example.com", "encodedPassword", AdminRole.ADMIN);
         admin.setId(UUID.randomUUID());
 
         when(passwordEncoder.encode("secure")).thenReturn("encodedPassword");
-
         when(adminRepository.createAdmin(any(), any(), eq("encodedPassword"), any())).thenReturn(admin);
 
         Admin result = adminService.createAdmin("Alice", "alice@example.com", "secure", AdminRole.ADMIN);
@@ -56,7 +62,6 @@ class AdminServiceTest {
         assertEquals(admin.getEmail(), result.getEmail());
         verify(adminRepository).createAdmin("Alice", "alice@example.com", "encodedPassword", AdminRole.ADMIN);
     }
-
 
     @Test
     void promoteUserToAdmin_shouldPromote_whenUserExists() {
@@ -67,6 +72,7 @@ class AdminServiceTest {
         Admin promoted = new Admin("Bob", "bob@example.com", "12345", AdminRole.ADMIN);
         promoted.setId(UUID.randomUUID());
 
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(true);
         when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
         when(adminRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
         when(adminRepository.createAdmin(any(), any(), any(), any())).thenReturn(promoted);
@@ -81,6 +87,7 @@ class AdminServiceTest {
     @Test
     void promoteUserToAdmin_shouldThrow_whenUserNotFound() {
         UUID userId = UUID.randomUUID();
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(true);
         when(userRepository.getUserById(userId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> adminService.promoteUserToAdmin(userId, AdminRole.ADMIN));
@@ -92,6 +99,7 @@ class AdminServiceTest {
         User user = new User("Bob", "bob@example.com", "12345", UserRole.STANDARD_USER);
         user.setId(userId);
 
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(true);
         when(userRepository.getUserById(userId)).thenReturn(Optional.of(user));
         when(adminRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(new Admin()));
 
@@ -100,14 +108,15 @@ class AdminServiceTest {
 
     @Test
     void promoteSupportToAdmin_shouldPromote_whenSupportExists() {
-        UUID adminId = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
         Admin support = new Admin("Support", "support@example.com", "pass", AdminRole.SUPPORT);
-        support.setId(adminId);
+        support.setId(id);
 
-        when(adminRepository.findAdminById(adminId)).thenReturn(Optional.of(support));
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(true);
+        when(adminRepository.findAdminById(id)).thenReturn(Optional.of(support));
         when(adminRepository.updateAdmin(support)).thenReturn(support);
 
-        Optional<Admin> result = adminService.promoteSupportToAdmin(adminId);
+        Optional<Admin> result = adminService.promoteSupportToAdmin(id);
 
         assertTrue(result.isPresent());
         assertEquals(AdminRole.ADMIN, result.get().getRole());
@@ -117,6 +126,7 @@ class AdminServiceTest {
     @Test
     void promoteSupportToAdmin_shouldReturnEmpty_whenNotFound() {
         UUID id = UUID.randomUUID();
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(true);
         when(adminRepository.findAdminById(id)).thenReturn(Optional.empty());
 
         Optional<Admin> result = adminService.promoteSupportToAdmin(id);
@@ -129,6 +139,7 @@ class AdminServiceTest {
         Admin admin = new Admin("Admin", "admin@example.com", "pass", AdminRole.ADMIN);
         admin.setId(id);
 
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(true);
         when(adminRepository.findAdminById(id)).thenReturn(Optional.of(admin));
 
         assertThrows(IllegalArgumentException.class, () -> adminService.promoteSupportToAdmin(id));
@@ -212,6 +223,9 @@ class AdminServiceTest {
     @Test
     void updateAdmin_shouldReturnUpdatedAdmin() {
         Admin admin = new Admin("X", "pass", "x@example.com", AdminRole.SUPPORT);
+        admin.setId(adminId);
+
+        when(authenticatedUserProvider.getCurrentUserId()).thenReturn(adminId);
         when(adminRepository.updateAdmin(admin)).thenReturn(admin);
 
         Admin updated = adminService.updateAdmin(admin);
@@ -222,10 +236,34 @@ class AdminServiceTest {
 
     @Test
     void deleteAdmin_shouldCallRepo() {
-        UUID id = UUID.randomUUID();
+        UUID currentUserId = UUID.randomUUID();
+        UUID targetId = UUID.randomUUID();
 
-        adminService.deleteAdmin(id);
+        when(authenticatedUserProvider.getCurrentUserId()).thenReturn(currentUserId);
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(true);
 
-        verify(adminRepository).deleteAdmin(id);
+        adminService.deleteAdmin(targetId);
+
+        verify(adminRepository).deleteAdmin(targetId);
+    }
+
+    @Test
+    void deleteAdmin_shouldThrow_whenDeletingSelf() {
+        UUID currentUserId = UUID.randomUUID();
+
+        when(authenticatedUserProvider.getCurrentUserId()).thenReturn(currentUserId);
+
+        assertThrows(SelfDemotionException.class, () -> adminService.deleteAdmin(currentUserId));
+    }
+
+    @Test
+    void deleteAdmin_shouldThrow_whenNotAdmin() {
+        UUID targetId = UUID.randomUUID();
+        UUID currentUserId = UUID.randomUUID();
+
+        when(authenticatedUserProvider.getCurrentUserId()).thenReturn(currentUserId);
+        when(authenticatedUserProvider.hasAdminRole()).thenReturn(false);
+
+        assertThrows(UnauthorizedException.class, () -> adminService.deleteAdmin(targetId));
     }
 }
