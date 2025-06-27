@@ -25,7 +25,6 @@ temp/
 docs/
 *.md
 README*
-Dockerfile*
 docker-compose*
 # Ignore Java-specific files
 *.class
