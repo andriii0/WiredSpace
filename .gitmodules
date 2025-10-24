@@ -1,0 +1,3 @@
+[submodule "wiredspace-frontend"]
+	path = wiredspace-frontend
+	url = https://github.com/andriii0/WiredSpace-Frontend.git
