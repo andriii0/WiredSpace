@@ -1,3 +1,5 @@
+This is my small project of a social network, built with Spring Boot for the backend, MySQL as the database, and JavaScript with React for the frontend. Cypress is used for end-to-end testing.
+
 welcome! 
 my frontend is hosted on docker nginx with the link: localhost:80 and backend is on localhost:8080
 
